@@ -12,7 +12,7 @@
 </div>
 
 <div class="table-card">
-    <form method="post" onsubmit="return validateStockInForm()">
+    <form method="post" onsubmit="return handleFormSubmit(event, 'validateStockInForm')">
         <div class="form-row">
             <div class="form-group">
                 <label for="drug_id">药品 *</label>
@@ -89,14 +89,57 @@ function validateStockInForm() {
     const warehouseId = document.getElementById('warehouse_id').value;
     
     if (!drugId) {
-        alert('请选择药品');
+        alert('❌ 请选择药品');
         return false;
     }
     
     if (!supplierId) {
-        alert('请选择供应商');
+        alert('❌ 请选择供应商，如果没有供应商请先添加');
         return false;
     }
+    
+    if (!warehouseId) {
+        alert('❌ 请选择仓库，如果没有仓库请先添加');
+        return false;
+    }
+    
+    if (quantity <= 0) {
+        alert('❌ 入库数量必须大于0');
+        return false;
+    }
+    
+    if (unitPrice <= 0) {
+        alert('❌ 单价必须大于0');
+        return false;
+    }
+    
+    return true;
+}
+
+// 通用表单提交处理
+function handleFormSubmit(event, validateFunc) {
+    event.preventDefault();
+    
+    // 执行验证
+    if (window[validateFunc] && !window[validateFunc]()) {
+        return false;
+    }
+    
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+    
+    form.submit();
+    
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }, 3000);
+    
+    return false;
     
     if (!warehouseId) {
         alert('请选择仓库');

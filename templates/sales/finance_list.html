@@ -66,8 +66,10 @@
                 <input type="date" id="stat_date" name="stat_date" class="form-control" required>
             </div>
             
+            <input type="hidden" name="employee_id" value="1">
+            
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">生成</button>
+                <button type="submit" class="btn btn-primary">生成统计</button>
                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('generateModal').style.display='none'">取消</button>
             </div>
         </form>
@@ -79,8 +81,17 @@
     color: #38a169;
 }
 </style>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.getElementById('stat_date').valueAsDate = new Date();
+// 设置默认日期为今天
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('stat_date');
+    if (dateInput) {
+        dateInput.value = today;
+    }
+});
 </script>
 {% endblock %}

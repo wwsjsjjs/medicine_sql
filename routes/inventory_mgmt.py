@@ -23,6 +23,25 @@ def stock_in_list():
 def stock_in_add():
     """添加入库"""
     if request.method == 'POST':
+        # 验证药品是否存在
+        drug = DrugInfo.query.get(request.form['drug_id'])
+        if not drug:
+            flash('指定的药品不存在，请先添加药品信息！', 'danger')
+            return redirect(url_for('inventory.stock_in_add'))
+        
+        # 验证供应商是否存在
+        supplier = SupplierInfo.query.get(request.form['supplier_id'])
+        if not supplier:
+            flash('指定的供应商不存在，请先添加供应商信息！', 'danger')
+            return redirect(url_for('inventory.stock_in_add'))
+        
+        # 验证仓库是否存在
+        warehouse_id = request.form.get('warehouse_id', 1)
+        warehouse = Warehouse.query.get(warehouse_id)
+        if not warehouse:
+            flash('指定的仓库不存在，请先添加仓库信息！', 'danger')
+            return redirect(url_for('inventory.stock_in_add'))
+        
         stock_in = StockIn(
             drug_id=request.form['drug_id'],
             supplier_id=request.form['supplier_id'],
@@ -90,6 +109,12 @@ def warehouse_list():
 def warehouse_add():
     """添加仓库"""
     if request.method == 'POST':
+        # 验证员工是否存在
+        employee = EmployeeInfo.query.get(request.form['manager_id'])
+        if not employee:
+            flash('指定的管理员不存在，请先添加员工信息！', 'danger')
+            return redirect(url_for('inventory.warehouse_add'))
+        
         warehouse = Warehouse(
             name=request.form['name'],
             address=request.form.get('address'),
@@ -132,6 +157,15 @@ def check_list():
 def check_add():
     """添加盘点"""
     if request.method == 'POST':
+        # 验证库存是否存在
+        inventory = Inventory.query.filter_by(
+            drug_id=request.form['drug_id'],
+            warehouse_id=request.form['warehouse_id']
+        ).first()
+        if not inventory:
+            flash('该药品在指定仓库中没有库存记录，无法进行盘点！', 'danger')
+            return redirect(url_for('inventory.check_add'))
+        
         checked_qty = int(request.form['checked_quantity'])
         actual_qty = int(request.form['actual_quantity'])
         
@@ -146,15 +180,15 @@ def check_add():
         )
         db.session.add(check)
         
-        # 更新库存
-        if checked_qty != actual_qty:
-            inventory = Inventory.query.filter_by(
-                drug_id=check.drug_id,
-                warehouse_id=check.warehouse_id
-            ).first()
-            if inventory:
+        # 更新库存（无论是否有差异都要更新盘点日期）
+        inventory = Inventory.query.filter_by(
+            drug_id=check.drug_id,
+            warehouse_id=check.warehouse_id
+        ).first()
+        if inventory:
+            if checked_qty != actual_qty:
                 inventory.quantity = actual_qty
-                inventory.last_check_date = check.check_date
+            inventory.last_check_date = check.check_date
         
         db.session.commit()
         flash('盘点完成！', 'success')
@@ -178,10 +212,25 @@ def return_list():
 def return_add():
     """添加退货"""
     if request.method == 'POST':
+        warehouse_id = request.form.get('warehouse_id', 1)
+        quantity = int(request.form['quantity'])
+        
+        # 验证库存是否存在且足够
+        inventory = Inventory.query.filter_by(
+            drug_id=request.form['drug_id'],
+            warehouse_id=warehouse_id
+        ).first()
+        if not inventory:
+            flash('该药品在指定仓库中没有库存，无法退货！', 'danger')
+            return redirect(url_for('inventory.return_add'))
+        if inventory.quantity < quantity:
+            flash(f'库存不足！当前库存：{inventory.quantity}，退货数量：{quantity}', 'danger')
+            return redirect(url_for('inventory.return_add'))
+        
         return_stock = ReturnStock(
             drug_id=request.form['drug_id'],
             supplier_id=request.form['supplier_id'],
-            quantity=request.form['quantity'],
+            quantity=quantity,
             reason=request.form.get('reason'),
             return_date=datetime.strptime(request.form['return_date'], '%Y-%m-%d').date(),
             employee_id=request.form.get('employee_id', 1)
@@ -189,12 +238,7 @@ def return_add():
         db.session.add(return_stock)
         
         # 减少库存
-        inventory = Inventory.query.filter_by(
-            drug_id=return_stock.drug_id,
-            warehouse_id=request.form.get('warehouse_id', 1)
-        ).first()
-        if inventory:
-            inventory.quantity -= int(request.form['quantity'])
+        inventory.quantity -= quantity
         
         db.session.commit()
         flash('退货处理成功！', 'success')

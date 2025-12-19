@@ -56,6 +56,30 @@
                     <button onclick="generateCustomers()" class="btn btn-primary">生成客户</button>
                 </div>
             </div>
+            
+            <div class="action-group">
+                <label>生成员工数据</label>
+                <div class="input-group">
+                    <input type="number" id="employee-count" value="5" min="1" max="100">
+                    <button onclick="generateEmployees()" class="btn btn-primary">生成员工</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>生成供应商数据</label>
+                <div class="input-group">
+                    <input type="number" id="supplier-count" value="3" min="1" max="50">
+                    <button onclick="generateSuppliers()" class="btn btn-primary">生成供应商</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>生成仓库数据</label>
+                <div class="input-group">
+                    <input type="number" id="warehouse-count" value="3" min="1" max="20">
+                    <button onclick="generateWarehouses()" class="btn btn-primary">生成仓库</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -78,6 +102,37 @@
                     <button onclick="batchSales()" class="btn btn-warning">批量销售</button>
                 </div>
             </div>
+            
+            <div class="action-group">
+                <label>批量退货测试</label>
+                <div class="input-group">
+                    <input type="number" id="return-count" value="5" min="1" max="100">
+                    <button onclick="batchReturnStock()" class="btn btn-warning">批量退货</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>批量销售退货</label>
+                <div class="input-group">
+                    <input type="number" id="sales-return-count" value="5" min="1" max="100">
+                    <button onclick="batchSalesReturn()" class="btn btn-warning">销售退货</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>库存盘点测试</label>
+                <div class="input-group">
+                    <input type="number" id="check-count" value="5" min="1" max="100">
+                    <button onclick="batchInventoryCheck()" class="btn btn-warning">库存盘点</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>财务统计生成</label>
+                <div class="input-group">
+                    <button onclick="generateFinanceStats()" class="btn btn-warning" style="flex: 1">生成财务统计</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -89,6 +144,13 @@
             开始全链路测试
         </button>
         <div id="chain-progress" class="progress-display"></div>
+    </div>
+
+    <!-- 危险操作 -->
+    <div class="test-section danger-section">
+        <h3>⚠️ 危险操作区</h3>
+        <p style="color: #e53e3e; margin-bottom: 15px;">以下操作将清空所有测试数据，请谨慎使用！</p>
+        <button onclick="clearAllData()" class="btn btn-danger">清空所有数据</button>
     </div>
 
     <!-- 测试日志 -->
@@ -126,22 +188,26 @@
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     padding: 20px;
     border-radius: 8px;
     text-align: center;
     color: white;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 .stat-label {
     font-size: 14px;
-    opacity: 0.9;
+    font-weight: 600;
     margin-bottom: 8px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .stat-value {
     font-size: 32px;
     font-weight: bold;
+    color: white;
 }
 
 .test-section {
@@ -153,12 +219,23 @@
 }
 
 .test-section.highlight {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .test-section.highlight h3 {
     color: white;
+}
+
+.test-section.highlight p {
+    color: white;
+    opacity: 0.95;
+}
+
+.test-section.danger-section {
+    background: #fff5f5;
+    border: 2px solid #fc8181;
 }
 
 .test-section h3 {
@@ -180,8 +257,9 @@
 }
 
 .action-group label {
-    font-weight: 500;
-    color: #4a5568;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
 }
 
 .input-group {
@@ -422,6 +500,244 @@ function fullChainTest() {
         .catch(error => {
             progress.innerHTML = '测试失败: ' + error;
             addLog('✗ 全链路测试失败: ' + error, 'error');
+        });
+}
+
+// 生成员工数据
+function generateEmployees() {
+    const count = document.getElementById('employee-count').value;
+    addLog(`开始生成 ${count} 条员工数据...`, 'info');
+    
+    fetch('/api/test/generate_employee', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成员工失败: ' + error, 'error');
+        });
+}
+
+// 生成供应商数据
+function generateSuppliers() {
+    const count = document.getElementById('supplier-count').value;
+    addLog(`开始生成 ${count} 条供应商数据...`, 'info');
+    
+    fetch('/api/test/generate_supplier', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成供应商失败: ' + error, 'error');
+        });
+}
+
+// 生成仓库数据
+function generateWarehouses() {
+    const count = document.getElementById('warehouse-count').value;
+    addLog(`开始生成 ${count} 条仓库数据...`, 'info');
+    
+    fetch('/api/test/generate_warehouse', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成仓库失败: ' + error, 'error');
+        });
+}
+
+// 批量退货
+function batchReturnStock() {
+    const count = document.getElementById('return-count').value;
+    addLog(`开始批量退货测试 (${count} 条)...`, 'warning');
+    
+    fetch('/api/test/batch_return_stock', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 批量退货失败: ' + error, 'error');
+        });
+}
+
+// 批量销售退货
+function batchSalesReturn() {
+    const count = document.getElementById('sales-return-count').value;
+    addLog(`开始批量销售退货测试 (${count} 条)...`, 'warning');
+    
+    fetch('/api/test/batch_sales_return', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 批量销售退货失败: ' + error, 'error');
+        });
+}
+
+// 库存盘点
+function batchInventoryCheck() {
+    const count = document.getElementById('check-count').value;
+    addLog(`开始库存盘点测试 (${count} 条)...`, 'warning');
+    
+    fetch('/api/test/batch_inventory_check', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 库存盘点失败: ' + error, 'error');
+        });
+}
+
+// 全链路测试
+function fullChainTest() {
+    const progressDiv = document.getElementById('chain-progress');
+    progressDiv.innerHTML = '<div class="loading">⏳ 全链路测试进行中...</div>';
+    addLog('========== 开始全链路测试 ==========', 'info');
+    
+    fetch('/api/test/full_chain_test', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                if (result.steps) {
+                    result.steps.forEach(step => addLog(step, 'info'));
+                }
+                if (result.data) {
+                    addLog(`药品: ${result.data.drug_name}`, 'info');
+                    addLog(`初始库存: ${result.data.initial_stock}`, 'info');
+                    addLog(`销售数量: ${result.data.sold}`, 'info');
+                    addLog(`剩余库存: ${result.data.remaining}`, 'info');
+                }
+                progressDiv.innerHTML = '<div class="success">✓ 全链路测试完成！</div>';
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+                if (result.steps) {
+                    result.steps.forEach(step => addLog(step, 'info'));
+                }
+                progressDiv.innerHTML = '<div class="error">✗ 测试失败</div>';
+            }
+            addLog('========== 全链路测试结束 ==========', 'info');
+        })
+        .catch(error => {
+            addLog('✗ 全链路测试失败: ' + error, 'error');
+            progressDiv.innerHTML = '<div class="error">✗ 测试失败</div>';
+        });
+}
+
+// 生成财务统计
+function generateFinanceStats() {
+    addLog('开始生成财务统计数据...', 'info');
+    
+    fetch('/api/test/generate_finance_stats', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                if (result.data) {
+                    result.data.forEach(stat => addLog(stat, 'info'));
+                }
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成财务统计失败: ' + error, 'error');
+        });
+}
+
+// 清空所有数据
+function clearAllData() {
+    if (!confirm('⚠️ 确定要清空所有测试数据吗？此操作不可恢复！')) {
+        return;
+    }
+    
+    addLog('开始清空所有数据...', 'warning');
+    
+    fetch('/api/test/clear_all_data', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 清空数据失败: ' + error, 'error');
         });
 }
 </script>

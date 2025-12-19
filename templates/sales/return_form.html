@@ -9,7 +9,7 @@
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return handleSalesReturnSubmit(event)">
         <div class="form-group">
             <label for="sales_id">原销售单 *</label>
             <select id="sales_id" name="sales_id" class="form-control" required>
@@ -63,5 +63,44 @@
 
 <script>
 document.getElementById('return_date').valueAsDate = new Date();
+
+function handleSalesReturnSubmit(event) {
+    event.preventDefault();
+    
+    const salesId = document.getElementById('sales_id').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const reason = document.getElementById('reason').value.trim();
+    
+    if (!salesId) {
+        alert('❌ 请选择原销售单');
+        return false;
+    }
+    
+    if (quantity <= 0) {
+        alert('❌ 退货数量必须大于0');
+        return false;
+    }
+    
+    if (!reason) {
+        alert('❌ 请填写退货原因');
+        return false;
+    }
+    
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+    
+    form.submit();
+    
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }, 3000);
+    
+    return false;
+}
 </script>
 {% endblock %}

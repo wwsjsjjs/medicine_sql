@@ -6,189 +6,205 @@ db = SQLAlchemy()
 # 药品信息表
 class DrugInfo(db.Model):
     __tablename__ = 'drug_info'
-    drug_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    drug_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, index=True)
     spec = db.Column(db.String(100))
     manufacturer = db.Column(db.String(200))
-    approval_number = db.Column(db.String(100))
+    approval_number = db.Column(db.String(100), unique=True)
     category = db.Column(db.String(50))  # 处方/非处方
     unit = db.Column(db.String(20))
-    purchase_price = db.Column(db.Numeric(10, 2))
-    sale_price = db.Column(db.Numeric(10, 2))
+    purchase_price = db.Column(db.Numeric(10, 2), nullable=False)
+    sale_price = db.Column(db.Numeric(10, 2), nullable=False)
     expiry_date = db.Column(db.Date)
-    status = db.Column(db.String(20), default='在售')
-    create_time = db.Column(db.DateTime, default=datetime.now)
-    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    status = db.Column(db.String(20), default='在售', nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 # 员工信息表
 class EmployeeInfo(db.Model):
     __tablename__ = 'employee_info'
-    employee_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    employee_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, index=True)
     department = db.Column(db.String(100))
     position = db.Column(db.String(100))
-    phone = db.Column(db.String(20))
+    phone = db.Column(db.String(20), unique=True)
     hire_date = db.Column(db.Date)
-    account = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(200))
-    status = db.Column(db.String(20), default='在职')
-    create_time = db.Column(db.DateTime, default=datetime.now)
-    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    account = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(20), default='在职', nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 # 客户信息表
 class CustomerInfo(db.Model):
     __tablename__ = 'customer_info'
-    customer_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(20))  # 零售/批发
+    customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, index=True)
+    type = db.Column(db.String(20), nullable=False)  # 零售/批发
     contact = db.Column(db.String(100))
-    phone = db.Column(db.String(20))
+    phone = db.Column(db.String(20), unique=True, index=True)
     address = db.Column(db.String(200))
-    create_time = db.Column(db.DateTime, default=datetime.now)
-    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 # 供应商信息表
 class SupplierInfo(db.Model):
     __tablename__ = 'supplier_info'
-    supplier_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    supplier_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, unique=True, index=True)
     contact = db.Column(db.String(100))
-    phone = db.Column(db.String(20))
+    phone = db.Column(db.String(20), unique=True, index=True)
     address = db.Column(db.String(200))
-    qualification_no = db.Column(db.String(100))
-    create_time = db.Column(db.DateTime, default=datetime.now)
-    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    qualification_no = db.Column(db.String(100), unique=True, index=True)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 # 权限表
 class Permission(db.Model):
     __tablename__ = 'permission'
-    permission_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    permission_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, unique=True, index=True)
     description = db.Column(db.String(200))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 角色表
 class Role(db.Model):
     __tablename__ = 'role'
-    role_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    role_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, unique=True, index=True)
     description = db.Column(db.String(200))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 角色权限关联表
 class RolePermission(db.Model):
     __tablename__ = 'role_permission'
-    id = db.Column(db.Integer, primary_key=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.role_id'))
-    permission_id = db.Column(db.Integer, db.ForeignKey('permission.permission_id'))
+    __table_args__ = (
+        db.UniqueConstraint('role_id', 'permission_id', name='uq_role_permission'),
+    )
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.role_id', ondelete='CASCADE'), nullable=False, index=True)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.permission_id', ondelete='CASCADE'), nullable=False, index=True)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 用户角色关联表
 class UserRole(db.Model):
     __tablename__ = 'user_role'
-    id = db.Column(db.Integer, primary_key=True)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    role_id = db.Column(db.Integer, db.ForeignKey('role.role_id'))
+    __table_args__ = (
+        db.UniqueConstraint('employee_id', 'role_id', name='uq_employee_role'),
+    )
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='CASCADE'), nullable=False, index=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.role_id', ondelete='CASCADE'), nullable=False, index=True)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 系统日志表
 class SystemLog(db.Model):
     __tablename__ = 'system_log'
-    log_id = db.Column(db.Integer, primary_key=True)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    action_type = db.Column(db.String(50))
-    table_name = db.Column(db.String(100))
-    action_time = db.Column(db.DateTime, default=datetime.now)
+    log_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'), index=True)
+    action_type = db.Column(db.String(50), nullable=False, index=True)
+    table_name = db.Column(db.String(100), nullable=False, index=True)
+    action_time = db.Column(db.DateTime, default=datetime.now, nullable=False, index=True)
     action_content = db.Column(db.Text)
 
 # 入库登记表
 class StockIn(db.Model):
     __tablename__ = 'stock_in'
-    stock_in_id = db.Column(db.Integer, primary_key=True)
-    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id'))
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier_info.supplier_id'))
-    quantity = db.Column(db.Integer)
-    unit_price = db.Column(db.Numeric(10, 2))
-    total_price = db.Column(db.Numeric(10, 2))
-    stock_in_date = db.Column(db.Date)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
+    stock_in_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id', ondelete='CASCADE'), nullable=False)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier_info.supplier_id', ondelete='CASCADE'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_price = db.Column(db.Numeric(10, 2), nullable=False)
+    stock_in_date = db.Column(db.Date, nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
     remark = db.Column(db.String(200))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 库存表
 class Inventory(db.Model):
     __tablename__ = 'inventory'
-    inventory_id = db.Column(db.Integer, primary_key=True)
-    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id'))
-    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.warehouse_id'))
-    quantity = db.Column(db.Integer)
+    __table_args__ = (
+        db.UniqueConstraint('drug_id', 'warehouse_id', name='uq_drug_warehouse'),
+    )
+    inventory_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id', ondelete='CASCADE'), nullable=False, index=True)
+    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.warehouse_id', ondelete='CASCADE'), nullable=False, index=True)
+    quantity = db.Column(db.Integer, default=0, nullable=False)
     location = db.Column(db.String(100))
     last_check_date = db.Column(db.Date)
-    create_time = db.Column(db.DateTime, default=datetime.now)
-    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 # 仓库表
 class Warehouse(db.Model):
     __tablename__ = 'warehouse'
-    warehouse_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    warehouse_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, unique=True, index=True)
     address = db.Column(db.String(200))
-    manager_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    manager_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 库存盘点表
 class InventoryCheck(db.Model):
     __tablename__ = 'inventory_check'
-    check_id = db.Column(db.Integer, primary_key=True)
-    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id'))
-    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.warehouse_id'))
-    checked_quantity = db.Column(db.Integer)
-    actual_quantity = db.Column(db.Integer)
+    check_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id', ondelete='CASCADE'), nullable=False, index=True)
+    warehouse_id = db.Column(db.Integer, db.ForeignKey('warehouse.warehouse_id', ondelete='CASCADE'), nullable=False, index=True)
+    checked_quantity = db.Column(db.Integer, nullable=False)
+    actual_quantity = db.Column(db.Integer, nullable=False)
     diff_reason = db.Column(db.String(200))
-    check_date = db.Column(db.Date)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    check_date = db.Column(db.Date, nullable=False, index=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 退货处理表
 class ReturnStock(db.Model):
     __tablename__ = 'return_stock'
-    return_id = db.Column(db.Integer, primary_key=True)
-    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id'))
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier_info.supplier_id'))
-    quantity = db.Column(db.Integer)
+    return_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id', ondelete='CASCADE'), nullable=False, index=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier_info.supplier_id', ondelete='CASCADE'), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
     reason = db.Column(db.String(200))
-    return_date = db.Column(db.Date)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    return_date = db.Column(db.Date, nullable=False, index=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 销售登记表
 class Sales(db.Model):
     __tablename__ = 'sales'
-    sales_id = db.Column(db.Integer, primary_key=True)
-    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id'))
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer_info.customer_id'))
-    quantity = db.Column(db.Integer)
-    unit_price = db.Column(db.Numeric(10, 2))
-    total_price = db.Column(db.Numeric(10, 2))
-    sales_date = db.Column(db.Date)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    sales_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drug_info.drug_id', ondelete='CASCADE'), nullable=False, index=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer_info.customer_id', ondelete='CASCADE'), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_price = db.Column(db.Numeric(10, 2), nullable=False)
+    sales_date = db.Column(db.Date, nullable=False, index=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 销售退货表
 class SalesReturn(db.Model):
     __tablename__ = 'sales_return'
-    sales_return_id = db.Column(db.Integer, primary_key=True)
-    sales_id = db.Column(db.Integer, db.ForeignKey('sales.sales_id'))
-    quantity = db.Column(db.Integer)
+    sales_return_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sales_id = db.Column(db.Integer, db.ForeignKey('sales.sales_id', ondelete='CASCADE'), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
     reason = db.Column(db.String(200))
-    return_date = db.Column(db.Date)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    return_date = db.Column(db.Date, nullable=False, index=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 # 财务统计表
 class FinanceStat(db.Model):
     __tablename__ = 'finance_stat'
-    stat_id = db.Column(db.Integer, primary_key=True)
-    stat_type = db.Column(db.String(20))  # 日/月
-    stat_date = db.Column(db.Date)
-    total_sales = db.Column(db.Numeric(15, 2))
-    total_cost = db.Column(db.Numeric(15, 2))
-    total_profit = db.Column(db.Numeric(15, 2))
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id'))
-    create_time = db.Column(db.DateTime, default=datetime.now)
+    __table_args__ = (
+        db.UniqueConstraint('stat_type', 'stat_date', name='uq_stat_type_date'),
+    )
+    stat_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    stat_type = db.Column(db.String(20), nullable=False)  # 日/月
+    stat_date = db.Column(db.Date, nullable=False, index=True)
+    total_sales = db.Column(db.Numeric(15, 2), default=0, nullable=False)
+    total_cost = db.Column(db.Numeric(15, 2), default=0, nullable=False)
+    total_profit = db.Column(db.Numeric(15, 2), default=0, nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee_info.employee_id', ondelete='SET NULL'))
+    create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)

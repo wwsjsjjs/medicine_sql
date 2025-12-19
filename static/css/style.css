@@ -131,6 +131,9 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     animation: slideIn 0.3s ease;
     transition: opacity 0.3s ease;
+    font-weight: 500;
+    font-size: 15px;
+    border-left: 4px solid rgba(255,255,255,0.5);
 }
 
 @keyframes slideIn {
@@ -144,14 +147,32 @@ body {
     }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
 .alert-success {
-    background: #48bb78;
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     color: white;
 }
 
+.alert-success::before {
+    content: "✓ ";
+    font-weight: bold;
+    font-size: 18px;
+}
+
 .alert-danger {
-    background: #f56565;
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
     color: white;
+}
+
+.alert-danger::before {
+    content: "✗ ";
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .alert-warning {

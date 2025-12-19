@@ -26,6 +26,31 @@ def sales_add():
     if request.method == 'POST':
         quantity = int(request.form['quantity'])
         unit_price = float(request.form['unit_price'])
+        warehouse_id = request.form.get('warehouse_id', 1)
+        
+        # 验证药品是否存在
+        drug = DrugInfo.query.get(request.form['drug_id'])
+        if not drug:
+            flash('指定的药品不存在！', 'danger')
+            return redirect(url_for('sales.sales_add'))
+        
+        # 验证客户是否存在
+        customer = CustomerInfo.query.get(request.form['customer_id'])
+        if not customer:
+            flash('指定的客户不存在，请先添加客户信息！', 'danger')
+            return redirect(url_for('sales.sales_add'))
+        
+        # 验证库存是否存在且足够
+        inventory = Inventory.query.filter_by(
+            drug_id=request.form['drug_id'],
+            warehouse_id=warehouse_id
+        ).first()
+        if not inventory:
+            flash('该药品无库存，无法销售！', 'danger')
+            return redirect(url_for('sales.sales_add'))
+        if inventory.quantity < quantity:
+            flash(f'库存不足！当前库存：{inventory.quantity}，销售数量：{quantity}', 'danger')
+            return redirect(url_for('sales.sales_add'))
         
         sale = Sales(
             drug_id=request.form['drug_id'],
@@ -39,19 +64,7 @@ def sales_add():
         db.session.add(sale)
         
         # 减少库存
-        inventory = Inventory.query.filter_by(
-            drug_id=sale.drug_id,
-            warehouse_id=request.form.get('warehouse_id', 1)
-        ).first()
-        if inventory:
-            if inventory.quantity >= quantity:
-                inventory.quantity -= quantity
-            else:
-                flash('库存不足！', 'danger')
-                return redirect(url_for('sales.sales_add'))
-        else:
-            flash('该药品无库存！', 'danger')
-            return redirect(url_for('sales.sales_add'))
+        inventory.quantity -= quantity
         
         db.session.commit()
         flash('销售登记成功！', 'success')
@@ -75,9 +88,23 @@ def return_list():
 def return_add():
     """添加销售退货"""
     if request.method == 'POST':
+        quantity = int(request.form['quantity'])
+        warehouse_id = request.form.get('warehouse_id', 1)
+        
+        # 验证销售记录是否存在
+        sale = Sales.query.get(request.form['sales_id'])
+        if not sale:
+            flash('指定的销售记录不存在！', 'danger')
+            return redirect(url_for('sales.return_add'))
+        
+        # 验证退货数量是否合理
+        if quantity > sale.quantity:
+            flash(f'退货数量不能超过销售数量！销售数量：{sale.quantity}', 'danger')
+            return redirect(url_for('sales.return_add'))
+        
         sales_return = SalesReturn(
             sales_id=request.form['sales_id'],
-            quantity=request.form['quantity'],
+            quantity=quantity,
             reason=request.form.get('reason'),
             return_date=datetime.strptime(request.form['return_date'], '%Y-%m-%d').date(),
             employee_id=request.form.get('employee_id', 1)
@@ -85,13 +112,20 @@ def return_add():
         db.session.add(sales_return)
         
         # 增加库存
-        sale = Sales.query.get(sales_return.sales_id)
         inventory = Inventory.query.filter_by(
             drug_id=sale.drug_id,
-            warehouse_id=request.form.get('warehouse_id', 1)
+            warehouse_id=warehouse_id
         ).first()
         if inventory:
-            inventory.quantity += int(request.form['quantity'])
+            inventory.quantity += quantity
+        else:
+            # 如果库存记录不存在，创建新记录
+            inventory = Inventory(
+                drug_id=sale.drug_id,
+                warehouse_id=warehouse_id,
+                quantity=quantity
+            )
+            db.session.add(inventory)
         
         db.session.commit()
         flash('销售退货处理成功！', 'success')
@@ -125,7 +159,10 @@ def finance_generate():
             filter(extract('month', Sales.sales_date) == stat_date.month).scalar() or 0
     
     # 计算成本（这里简化处理，实际应从采购价计算）
-    total_cost = total_sales * 0.6  # 假设成本率60%
+    # 将Decimal转换为float进行计算，或使用Decimal类型
+    from decimal import Decimal
+    total_sales = Decimal(str(total_sales)) if total_sales else Decimal('0')
+    total_cost = total_sales * Decimal('0.6')  # 假设成本率60%
     total_profit = total_sales - total_cost
     
     finance_stat = FinanceStat(

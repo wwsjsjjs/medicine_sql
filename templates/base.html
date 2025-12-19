@@ -29,9 +29,6 @@
                     <a href="{{ url_for('basic.employee_list') }}" class="nav-item">
                         <span class="icon">👥</span> 员工管理
                     </a>
-                    <a href="{{ url_for('basic.customer_list') }}" class="nav-item">
-                        <span class="icon">🏪</span> 客户管理
-                    </a>
                     <a href="{{ url_for('basic.supplier_list') }}" class="nav-item">
                         <span class="icon">🏭</span> 供应商管理
                     </a>
@@ -39,14 +36,14 @@
                 
                 <div class="nav-group">
                     <div class="nav-group-title">库存管理</div>
+                    <a href="{{ url_for('inventory.warehouse_list') }}" class="nav-item">
+                        <span class="icon">🏢</span> 仓库管理
+                    </a>
                     <a href="{{ url_for('inventory.stock_in_list') }}" class="nav-item">
                         <span class="icon">📥</span> 入库登记
                     </a>
                     <a href="{{ url_for('inventory.stock_list') }}" class="nav-item">
                         <span class="icon">📦</span> 库存查询
-                    </a>
-                    <a href="{{ url_for('inventory.warehouse_list') }}" class="nav-item">
-                        <span class="icon">🏢</span> 仓库管理
                     </a>
                     <a href="{{ url_for('inventory.check_list') }}" class="nav-item">
                         <span class="icon">✅</span> 库存盘点
@@ -58,6 +55,9 @@
                 
                 <div class="nav-group">
                     <div class="nav-group-title">销售管理</div>
+                    <a href="{{ url_for('basic.customer_list') }}" class="nav-item">
+                        <span class="icon">🏪</span> 客户管理
+                    </a>
                     <a href="{{ url_for('sales.sales_list') }}" class="nav-item">
                         <span class="icon">💰</span> 销售登记
                     </a>
@@ -76,6 +76,12 @@
                     <div class="nav-group-title">系统测试</div>
                     <a href="{{ url_for('api_test.index') }}" class="nav-item">
                         <span class="icon">🧪</span> API测试控制台
+                    </a>
+                    <a href="{{ url_for('api_test.custom_data') }}" class="nav-item">
+                        <span class="icon">🎨</span> 自定义测试数据
+                    </a>
+                    <a href="{{ url_for('api_test.view_system_tables') }}" class="nav-item">
+                        <span class="icon">🗂️</span> 系统表查看
                     </a>
                 </div>
             </nav>
@@ -121,6 +127,28 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
         
+        // 增强Flash消息显示
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                // 为错误消息添加震动效果
+                if (alert.classList.contains('alert-danger')) {
+                    alert.style.animation = 'shake 0.5s';
+                    // 播放系统提示音（如果浏览器允许）
+                    try {
+                        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVq3n77BdGAg+ltrzxnIjBS1+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzzn0pBSp7yvHajj0HFmm+7eeaSwwNU6vl8LFeFgk7k9rywHAiBi+B0PLRfSwGImq97+qbSw0OUavi8rJdGAk9ldz1wW8jBTGCzPLSfzEGI2++7uqYSQ0PU6vm8rJcGAg7lNn0wG8jBjGBzfLRfjEGI3C97Oqcag0OUqzl8rJdFgg7ldrwwXAjBi+BzvLRfS8GI3C89+maSQ0PUqzl8rJdGAg7lNj0wW8jBjCBz/LQfjEGI3C97Oqbag0OUqzl8rJdGAg7lNj0wG8iBjCBz/LQfjEGI3C97OqbSQ0OUqvl8rJdGAg7lNn0wG8jBjCBzvLQfjAGI3C97OqbaQ0OUqvl8rJeFgg7lNr0wG8jBjCBzvHQfi8GI3C97OqbSQ0PUqvm8rJcGAg7lNn0wG8jBjCBzvLQfjAGI3C87eqbSQ0OUqvm8rJdGAg7lNn0wG8jBjCBzvLQfjAGI3C97OqbSQ0OUqvm8rJdGAg7lNn0wG8jBjCBzvLQfjAGI3C97OqbSQ0OUqvm8rJdGAg=');
+                        audio.volume = 0.3;
+                        audio.play().catch(() => {});
+                    } catch (e) {}
+                }
+                
+                // 为成功消息添加滑入效果
+                if (alert.classList.contains('alert-success')) {
+                    alert.style.animation = 'slideIn 0.3s';
+                }
+            });
+        });
+        
         // 自动隐藏Flash消息
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');
@@ -128,7 +156,30 @@
                 alert.style.opacity = '0';
                 setTimeout(() => alert.remove(), 300);
             });
-        }, 3000);
+        }, 5000);  // 延长到5秒以便用户有足够时间看到
+        
+        // 保存和恢复侧边栏滚动位置
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            // 恢复之前保存的滚动位置
+            const savedScrollPos = sessionStorage.getItem('sidebarScrollPos');
+            if (savedScrollPos) {
+                sidebar.scrollTop = parseInt(savedScrollPos);
+            }
+            
+            // 保存滚动位置
+            sidebar.addEventListener('scroll', function() {
+                sessionStorage.setItem('sidebarScrollPos', sidebar.scrollTop);
+            });
+            
+            // 点击链接时也保存滚动位置
+            const navLinks = sidebar.querySelectorAll('a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('sidebarScrollPos', sidebar.scrollTop);
+                });
+            });
+        }
     </script>
     
     {% block extra_js %}{% endblock %}

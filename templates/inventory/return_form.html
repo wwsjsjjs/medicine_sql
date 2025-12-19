@@ -9,7 +9,7 @@
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return handleReturnSubmit(event)">
         <div class="form-row">
             <div class="form-group">
                 <label for="drug_id">药品 *</label>
@@ -73,5 +73,50 @@
 
 <script>
 document.getElementById('return_date').valueAsDate = new Date();
+
+function handleReturnSubmit(event) {
+    event.preventDefault();
+    
+    const drugId = document.getElementById('drug_id').value;
+    const supplierId = document.getElementById('supplier_id').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const reason = document.getElementById('reason').value.trim();
+    
+    if (!drugId) {
+        alert('❌ 请选择药品');
+        return false;
+    }
+    
+    if (!supplierId) {
+        alert('❌ 请选择供应商');
+        return false;
+    }
+    
+    if (quantity <= 0) {
+        alert('❌ 退货数量必须大于0');
+        return false;
+    }
+    
+    if (!reason) {
+        alert('❌ 请填写退货原因');
+        return false;
+    }
+    
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+    
+    form.submit();
+    
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }, 3000);
+    
+    return false;
+}
 </script>
 {% endblock %}

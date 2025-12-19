@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_migrate import Migrate
 from models import db
 from routes.dashboard import dashboard_bp
 from routes.basic_info import basic_bp
@@ -16,6 +17,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 最大请求体16MB
 app.config['JSON_SORT_KEYS'] = False
 
 db.init_app(app)
+migrate = Migrate(app, db)
 
 # 注册蓝图
 app.register_blueprint(dashboard_bp)

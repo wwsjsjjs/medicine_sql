@@ -12,7 +12,7 @@
 </div>
 
 <div class="table-card">
-    <form method="post" onsubmit="return validateSalesForm()">
+    <form method="post" onsubmit="return handleSalesSubmit(event)">
         <div class="form-row">
             <div class="form-group">
                 <label for="drug_id">药品 *</label>
@@ -103,34 +103,54 @@ function calculateTotal() {
 document.getElementById('quantity').addEventListener('input', calculateTotal);
 document.getElementById('unit_price').addEventListener('input', calculateTotal);
 
-// 表单验证
-function validateSalesForm() {
+// 表单提交处理
+function handleSalesSubmit(event) {
+    event.preventDefault();
+    
     const drugId = document.getElementById('drug_id').value;
     const customerId = document.getElementById('customer_id').value;
     const quantity = parseInt(document.getElementById('quantity').value);
     const unitPrice = parseFloat(document.getElementById('unit_price').value);
     
+    // 前端验证
     if (!drugId) {
-        alert('请选择药品');
+        alert('❌ 请选择药品');
         return false;
     }
     
     if (!customerId) {
-        alert('请选择客户');
+        alert('❌ 请选择客户');
         return false;
     }
     
     if (quantity <= 0) {
-        alert('销售数量必须大于0');
+        alert('❌ 销售数量必须大于0');
         return false;
     }
     
     if (unitPrice <= 0) {
-        alert('销售单价必须大于0');
+        alert('❌ 销售单价必须大于0');
         return false;
     }
     
-    return true;
+    // 提交表单
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+    
+    // 使用原生表单提交
+    form.submit();
+    
+    // 如果3秒后还没跳转，恢复按钮状态
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }, 3000);
+    
+    return false;
 }
 
 // 设置默认日期为今天
