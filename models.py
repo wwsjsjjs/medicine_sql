@@ -1,3 +1,67 @@
+def init_basic_tables():
+    """初始化基础表数据（角色、权限、角色权限、用户角色、系统管理员）"""
+    from sqlalchemy.exc import IntegrityError
+    # 1. 初始化权限
+    default_permissions = [
+        {'name': '系统管理', 'description': '系统管理权限'},
+        {'name': '药品管理', 'description': '药品信息管理'},
+        {'name': '库存管理', 'description': '库存管理权限'},
+        {'name': '销售管理', 'description': '销售管理权限'},
+        {'name': '客户管理', 'description': '客户信息管理'},
+        {'name': '供应商管理', 'description': '供应商信息管理'},
+        {'name': '财务统计', 'description': '财务统计查看'},
+    ]
+    for perm in default_permissions:
+        if not Permission.query.filter_by(name=perm['name']).first():
+            db.session.add(Permission(**perm))
+    db.session.commit()
+
+    # 2. 初始化角色
+    default_roles = [
+        {'name': '系统管理员', 'description': '拥有全部权限'},
+        {'name': '普通员工', 'description': '普通操作权限'},
+    ]
+    for role in default_roles:
+        if not Role.query.filter_by(name=role['name']).first():
+            db.session.add(Role(**role))
+    db.session.commit()
+
+    # 3. 角色权限分配（系统管理员拥有全部权限，普通员工部分权限）
+    admin_role = Role.query.filter_by(name='系统管理员').first()
+    employee_role = Role.query.filter_by(name='普通员工').first()
+    all_permissions = Permission.query.all()
+    for perm in all_permissions:
+        if not RolePermission.query.filter_by(role_id=admin_role.role_id, permission_id=perm.permission_id).first():
+            db.session.add(RolePermission(role_id=admin_role.role_id, permission_id=perm.permission_id))
+    # 普通员工只分配部分权限
+    for perm in all_permissions:
+        if perm.name in ['药品管理', '库存管理', '销售管理', '客户管理', '供应商管理']:
+            if not RolePermission.query.filter_by(role_id=employee_role.role_id, permission_id=perm.permission_id).first():
+                db.session.add(RolePermission(role_id=employee_role.role_id, permission_id=perm.permission_id))
+    db.session.commit()
+
+    # 4. 初始化系统管理员账号
+    admin = EmployeeInfo.query.filter_by(account='admin').first()
+    if not admin:
+        admin = EmployeeInfo(
+            name='系统管理员',
+            account='admin',
+            password='admin123',
+            phone='13000000000',
+            department='管理',
+            position='系统管理员',
+            status='在职'
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+    # 5. 管理员分配角色
+    if not UserRole.query.filter_by(employee_id=admin.employee_id, role_id=admin_role.role_id).first():
+        db.session.add(UserRole(employee_id=admin.employee_id, role_id=admin_role.role_id))
+        db.session.commit()
+
+    # 6. 系统日志表可不插入默认数据
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 

@@ -5,7 +5,7 @@ from routes.dashboard import dashboard_bp
 from routes.basic_info import basic_bp
 from routes.inventory_mgmt import inventory_bp
 from routes.sales_mgmt import sales_bp
-from routes.api_test import api_test_bp
+from routes.sys_test import api_test_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medicine.db'
@@ -26,7 +26,10 @@ app.register_blueprint(inventory_bp)
 app.register_blueprint(sales_bp)
 app.register_blueprint(api_test_bp)
 
+from models import init_basic_tables
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        init_basic_tables()
     app.run(debug=True)
