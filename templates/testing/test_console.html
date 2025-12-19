@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}API测试控制台 - 医药管理系统{% endblock %}
+{% block page_title %}API测试控制台{% endblock %}
+
+{% block content %}
+<div class="test-console">
+    <!-- 系统统计 -->
+    <div class="stats-section">
+        <h3>📊 系统统计</h3>
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-label">药品数量</div>
+                <div class="stat-value" id="stat-drugs">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">客户数量</div>
+                <div class="stat-value" id="stat-customers">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">供应商数量</div>
+                <div class="stat-value" id="stat-suppliers">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">总库存</div>
+                <div class="stat-value" id="stat-inventory">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">入库记录</div>
+                <div class="stat-value" id="stat-stockins">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">销售记录</div>
+                <div class="stat-value" id="stat-sales">-</div>
+            </div>
+        </div>
+        <button onclick="loadStats()" class="btn btn-secondary">🔄 刷新统计</button>
+    </div>
+
+    <!-- 数据生成 -->
+    <div class="test-section">
+        <h3>🎲 测试数据生成</h3>
+        <div class="test-actions">
+            <div class="action-group">
+                <label>生成药品数据</label>
+                <div class="input-group">
+                    <input type="number" id="drug-count" value="5" min="1" max="100">
+                    <button onclick="generateDrugs()" class="btn btn-primary">生成药品</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>生成客户数据</label>
+                <div class="input-group">
+                    <input type="number" id="customer-count" value="5" min="1" max="100">
+                    <button onclick="generateCustomers()" class="btn btn-primary">生成客户</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量操作测试 -->
+    <div class="test-section">
+        <h3>⚡ 批量操作测试</h3>
+        <div class="test-actions">
+            <div class="action-group">
+                <label>批量入库测试</label>
+                <div class="input-group">
+                    <input type="number" id="stockin-count" value="10" min="1" max="1000">
+                    <button onclick="batchStockIn()" class="btn btn-warning">批量入库</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <label>批量销售测试</label>
+                <div class="input-group">
+                    <input type="number" id="sales-count" value="10" min="1" max="1000">
+                    <button onclick="batchSales()" class="btn btn-warning">批量销售</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全链路测试 -->
+    <div class="test-section highlight">
+        <h3>🚀 全链路自动化测试</h3>
+        <p>自动执行：创建药品 → 入库 → 销售 → 更新库存的完整流程</p>
+        <button onclick="fullChainTest()" class="btn btn-success btn-large">
+            开始全链路测试
+        </button>
+        <div id="chain-progress" class="progress-display"></div>
+    </div>
+
+    <!-- 测试日志 -->
+    <div class="test-section">
+        <h3>📝 测试日志</h3>
+        <div id="testLog" class="test-log"></div>
+        <button onclick="clearLog()" class="btn btn-secondary">清空日志</button>
+    </div>
+</div>
+
+<style>
+.test-console {
+    padding: 20px;
+}
+
+.stats-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.stats-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2d3748;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+}
+
+.stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.test-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.test-section.highlight {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.test-section.highlight h3 {
+    color: white;
+}
+
+.test-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2d3748;
+}
+
+.test-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-group label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 0 0 80px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.progress-display {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    min-height: 50px;
+    color: white;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.test-log {
+    background: #1a202c;
+    color: #48bb78;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+}
+
+.log-success {
+    color: #48bb78;
+}
+
+.log-error {
+    color: #f56565;
+}
+
+.log-info {
+    color: #4299e1;
+}
+
+.log-warning {
+    color: #ed8936;
+}
+</style>
+
+<script>
+let logContainer;
+
+document.addEventListener('DOMContentLoaded', function() {
+    logContainer = document.getElementById('testLog');
+    loadStats();
+    addLog('系统就绪，等待测试命令...', 'info');
+});
+
+// 添加日志
+function addLog(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.textContent = `[${timestamp}] ${message}`;
+    logContainer.appendChild(entry);
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+// 清空日志
+function clearLog() {
+    logContainer.innerHTML = '';
+    addLog('日志已清空', 'info');
+}
+
+// 加载统计信息
+function loadStats() {
+    addLog('正在加载系统统计...', 'info');
+    
+    fetch('/api/test/stats')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                document.getElementById('stat-drugs').textContent = result.data.drugs;
+                document.getElementById('stat-customers').textContent = result.data.customers;
+                document.getElementById('stat-suppliers').textContent = result.data.suppliers;
+                document.getElementById('stat-inventory').textContent = result.data.total_inventory;
+                document.getElementById('stat-stockins').textContent = result.data.stock_ins;
+                document.getElementById('stat-sales').textContent = result.data.sales;
+                addLog('✓ 统计信息加载成功', 'success');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 加载统计失败: ' + error, 'error');
+        });
+}
+
+// 生成药品数据
+function generateDrugs() {
+    const count = document.getElementById('drug-count').value;
+    addLog(`开始生成 ${count} 条药品数据...`, 'info');
+    
+    fetch('/api/test/generate_drug', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成药品失败: ' + error, 'error');
+        });
+}
+
+// 生成客户数据
+function generateCustomers() {
+    const count = document.getElementById('customer-count').value;
+    addLog(`开始生成 ${count} 条客户数据...`, 'info');
+    
+    fetch('/api/test/generate_customer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 生成客户失败: ' + error, 'error');
+        });
+}
+
+// 批量入库
+function batchStockIn() {
+    const count = document.getElementById('stockin-count').value;
+    addLog(`开始批量入库测试 (${count} 条)...`, 'warning');
+    
+    fetch('/api/test/batch_stock_in', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 批量入库失败: ' + error, 'error');
+        });
+}
+
+// 批量销售
+function batchSales() {
+    const count = document.getElementById('sales-count').value;
+    addLog(`开始批量销售测试 (${count} 条)...`, 'warning');
+    
+    fetch('/api/test/batch_sales', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({count: parseInt(count)})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✓ ${result.message}`, 'success');
+                loadStats();
+            } else {
+                addLog(`✗ ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            addLog('✗ 批量销售失败: ' + error, 'error');
+        });
+}
+
+// 全链路测试
+function fullChainTest() {
+    const progress = document.getElementById('chain-progress');
+    progress.innerHTML = '正在执行全链路测试...\n';
+    addLog('========== 开始全链路测试 ==========', 'warning');
+    
+    fetch('/api/test/full_chain_test', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                progress.innerHTML = result.steps.join('\n');
+                addLog('========== 全链路测试完成 ==========', 'success');
+                result.steps.forEach(step => addLog(step, 'success'));
+                addLog(`药品: ${result.data.drug_name}`, 'info');
+                addLog(`初始库存: ${result.data.initial_stock}, 已售: ${result.data.sold}, 剩余: ${result.data.remaining}`, 'info');
+                loadStats();
+            } else {
+                progress.innerHTML = '测试失败: ' + result.message;
+                addLog(`✗ ${result.message}`, 'error');
+                if (result.steps) {
+                    result.steps.forEach(step => addLog(step, 'info'));
+                }
+            }
+        })
+        .catch(error => {
+            progress.innerHTML = '测试失败: ' + error;
+            addLog('✗ 全链路测试失败: ' + error, 'error');
+        });
+}
+</script>
+{% endblock %}

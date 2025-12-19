@@ -6,21 +6,28 @@
 {% block content %}
 <div class="page-header">
     <h2>{% if drug %}编辑{% else %}添加{% endif %}药品</h2>
+    {% if not drug %}
+    <button type="button" onclick="quickFill('drug')" class="btn btn-success">
+        🎲 快速填充测试数据
+    </button>
+    {% endif %}
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return validateDrugForm()"
         <div class="form-row">
             <div class="form-group">
                 <label for="name">药品名称 *</label>
                 <input type="text" id="name" name="name" class="form-control" 
-                       value="{{ drug.name if drug else '' }}" required>
+                       value="{{ drug.name if drug else '' }}" 
+                       placeholder="例如：阿莫西林胶囊" required>
             </div>
             
             <div class="form-group">
                 <label for="spec">规格</label>
                 <input type="text" id="spec" name="spec" class="form-control" 
-                       value="{{ drug.spec if drug else '' }}">
+                       value="{{ drug.spec if drug else '' }}"
+                       placeholder="例如：0.25g*24粒">
             </div>
         </div>
         
@@ -28,13 +35,15 @@
             <div class="form-group">
                 <label for="manufacturer">生产厂家</label>
                 <input type="text" id="manufacturer" name="manufacturer" class="form-control" 
-                       value="{{ drug.manufacturer if drug else '' }}">
+                       value="{{ drug.manufacturer if drug else '' }}"
+                       placeholder="例如：扬子江药业集团">
             </div>
             
             <div class="form-group">
                 <label for="approval_number">批准文号</label>
                 <input type="text" id="approval_number" name="approval_number" class="form-control" 
-                       value="{{ drug.approval_number if drug else '' }}">
+                       value="{{ drug.approval_number if drug else '' }}"
+                       placeholder="例如：国药准字Z20210001">
             </div>
         </div>
         
@@ -90,6 +99,40 @@
         </div>
     </form>
 </div>
+
+<script>
+function validateDrugForm() {
+    const name = document.getElementById('name').value.trim();
+    const purchasePrice = parseFloat(document.getElementById('purchase_price').value) || 0;
+    const salePrice = parseFloat(document.getElementById('sale_price').value) || 0;
+    const approval = document.getElementById('approval_number').value.trim();
+    
+    if (!name) {
+        alert('请输入药品名称');
+        return false;
+    }
+    
+    if (purchasePrice < 0 || salePrice < 0) {
+        alert('价格不能为负数');
+        return false;
+    }
+    
+    if (salePrice > 0 && purchasePrice > 0 && salePrice < purchasePrice) {
+        if (!confirm('销售价低于进货价，是否继续？')) {
+            return false;
+        }
+    }
+    
+    // 批准文号格式验证（可选）
+    if (approval && !/^[国进]药准字[A-Z]\d{8}$/.test(approval)) {
+        if (!confirm('批准文号格式可能不正确（应为：国药准字Z20210001），是否继续？')) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+</script>
 
 <style>
 .form-row {

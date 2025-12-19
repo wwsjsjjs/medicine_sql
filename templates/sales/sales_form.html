@@ -6,10 +6,13 @@
 {% block content %}
 <div class="page-header">
     <h2>销售登记</h2>
+    <button type="button" onclick="quickFill('sales')" class="btn btn-success">
+        🎲 快速填充测试数据
+    </button>
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return validateSalesForm()">
         <div class="form-row">
             <div class="form-group">
                 <label for="drug_id">药品 *</label>
@@ -37,7 +40,8 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="quantity">数量 *</label>
-                <input type="number" id="quantity" name="quantity" class="form-control" required min="1" value="1">
+                <input type="number" id="quantity" name="quantity" class="form-control" required min="1" value="1"
+                       placeholder="例如：10">
             </div>
             
             <div class="form-group">
@@ -98,6 +102,36 @@ function calculateTotal() {
 
 document.getElementById('quantity').addEventListener('input', calculateTotal);
 document.getElementById('unit_price').addEventListener('input', calculateTotal);
+
+// 表单验证
+function validateSalesForm() {
+    const drugId = document.getElementById('drug_id').value;
+    const customerId = document.getElementById('customer_id').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const unitPrice = parseFloat(document.getElementById('unit_price').value);
+    
+    if (!drugId) {
+        alert('请选择药品');
+        return false;
+    }
+    
+    if (!customerId) {
+        alert('请选择客户');
+        return false;
+    }
+    
+    if (quantity <= 0) {
+        alert('销售数量必须大于0');
+        return false;
+    }
+    
+    if (unitPrice <= 0) {
+        alert('销售单价必须大于0');
+        return false;
+    }
+    
+    return true;
+}
 
 // 设置默认日期为今天
 document.getElementById('sales_date').valueAsDate = new Date();

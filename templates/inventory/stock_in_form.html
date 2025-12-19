@@ -6,10 +6,13 @@
 {% block content %}
 <div class="page-header">
     <h2>入库登记</h2>
+    <button type="button" onclick="quickFill('stock_in')" class="btn btn-success">
+        🎲 快速填充测试数据
+    </button>
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return validateStockInForm()">
         <div class="form-row">
             <div class="form-group">
                 <label for="drug_id">药品 *</label>
@@ -35,12 +38,14 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="quantity">数量 *</label>
-                <input type="number" id="quantity" name="quantity" class="form-control" required min="1">
+                <input type="number" id="quantity" name="quantity" class="form-control" required min="1"
+                       placeholder="例如：100">
             </div>
             
             <div class="form-group">
                 <label for="unit_price">单价 *</label>
-                <input type="number" step="0.01" id="unit_price" name="unit_price" class="form-control" required min="0">
+                <input type="number" step="0.01" id="unit_price" name="unit_price" class="form-control" required min="0"
+                       placeholder="例如：25.50">
             </div>
         </div>
         
@@ -64,7 +69,8 @@
         
         <div class="form-group">
             <label for="remark">备注</label>
-            <textarea id="remark" name="remark" class="form-control" rows="3"></textarea>
+            <textarea id="remark" name="remark" class="form-control" rows="3"
+                      placeholder="例如：紧急补货、新品入库等"></textarea>
         </div>
         
         <div class="form-actions">
@@ -73,6 +79,43 @@
         </div>
     </form>
 </div>
+
+<script>
+function validateStockInForm() {
+    const drugId = document.getElementById('drug_id').value;
+    const supplierId = document.getElementById('supplier_id').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const unitPrice = parseFloat(document.getElementById('unit_price').value);
+    const warehouseId = document.getElementById('warehouse_id').value;
+    
+    if (!drugId) {
+        alert('请选择药品');
+        return false;
+    }
+    
+    if (!supplierId) {
+        alert('请选择供应商');
+        return false;
+    }
+    
+    if (!warehouseId) {
+        alert('请选择仓库');
+        return false;
+    }
+    
+    if (quantity <= 0) {
+        alert('入库数量必须大于0');
+        return false;
+    }
+    
+    if (unitPrice < 0) {
+        alert('单价不能为负数');
+        return false;
+    }
+    
+    return true;
+}
+</script>
 
 <style>
 .form-row {

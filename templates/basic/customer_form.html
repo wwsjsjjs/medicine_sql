@@ -6,15 +6,21 @@
 {% block content %}
 <div class="page-header">
     <h2>{% if customer %}编辑{% else %}添加{% endif %}客户</h2>
+    {% if not customer %}
+    <button type="button" onclick="quickFill('customer')" class="btn btn-success">
+        🎲 快速填充测试数据
+    </button>
+    {% endif %}
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return validateCustomerForm()">
         <div class="form-row">
             <div class="form-group">
                 <label for="name">客户名称 *</label>
                 <input type="text" id="name" name="name" class="form-control" 
-                       value="{{ customer.name if customer else '' }}" required>
+                       value="{{ customer.name if customer else '' }}" 
+                       placeholder="例如：张三/幸福医院" required>
             </div>
             
             <div class="form-group">
@@ -30,20 +36,23 @@
             <div class="form-group">
                 <label for="contact">联系人</label>
                 <input type="text" id="contact" name="contact" class="form-control" 
-                       value="{{ customer.contact if customer else '' }}">
+                       value="{{ customer.contact if customer else '' }}"
+                       placeholder="例如：李四">
             </div>
             
             <div class="form-group">
                 <label for="phone">电话</label>
-                <input type="text" id="phone" name="phone" class="form-control" 
-                       value="{{ customer.phone if customer else '' }}">
+                <input type="tel" id="phone" name="phone" class="form-control" 
+                       value="{{ customer.phone if customer else '' }}"
+                       placeholder="例如：13912345678">
             </div>
         </div>
         
         <div class="form-group">
             <label for="address">地址</label>
             <input type="text" id="address" name="address" class="form-control" 
-                   value="{{ customer.address if customer else '' }}">
+                   value="{{ customer.address if customer else '' }}"
+                   placeholder="例如：北京市朝阳区建国路1号">
         </div>
         
         <div class="form-actions">
@@ -52,6 +61,27 @@
         </div>
     </form>
 </div>
+
+<script>
+function validateCustomerForm() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    
+    if (!name) {
+        alert('请输入客户名称');
+        return false;
+    }
+    
+    // 电话号码验证
+    if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
+        if (!confirm('手机号格式可能不正确，是否继续？')) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+</script>
 
 <style>
 .form-row {

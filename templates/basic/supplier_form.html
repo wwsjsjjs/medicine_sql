@@ -6,40 +6,50 @@
 {% block content %}
 <div class="page-header">
     <h2>{% if supplier %}编辑{% else %}添加{% endif %}供应商</h2>
+    {% if not supplier %}
+    <button type="button" onclick="quickFill('supplier')" class="btn btn-success">
+        🎲 快速填充测试数据
+    </button>
+    {% endif %}
 </div>
 
 <div class="table-card">
-    <form method="post">
+    <form method="post" onsubmit="return validateSupplierForm()">
         <div class="form-group">
             <label for="name">供应商名称 *</label>
             <input type="text" id="name" name="name" class="form-control" 
-                   value="{{ supplier.name if supplier else '' }}" required>
+                   value="{{ supplier.name if supplier else '' }}" 
+                   placeholder="例如：华东医药有限公司" required>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="contact">联系人</label>
                 <input type="text" id="contact" name="contact" class="form-control" 
-                       value="{{ supplier.contact if supplier else '' }}">
+                       value="{{ supplier.contact if supplier else '' }}"
+                       placeholder="例如：王五">
             </div>
             
             <div class="form-group">
                 <label for="phone">电话</label>
-                <input type="text" id="phone" name="phone" class="form-control" 
-                       value="{{ supplier.phone if supplier else '' }}">
+                <input type="tel" id="phone" name="phone" class="form-control" 
+                       value="{{ supplier.phone if supplier else '' }}"
+                       placeholder="例如：13911112222">
             </div>
         </div>
         
         <div class="form-group">
             <label for="address">地址</label>
             <input type="text" id="address" name="address" class="form-control" 
-                   value="{{ supplier.address if supplier else '' }}">
+                   value="{{ supplier.address if supplier else '' }}"
+                   placeholder="例如：上海市浦东新区世纪大道1号">
         </div>
         
         <div class="form-group">
             <label for="qualification_no">资质编号</label>
             <input type="text" id="qualification_no" name="qualification_no" class="form-control" 
-                   value="{{ supplier.qualification_no if supplier else '' }}">
+                   value="{{ supplier.qualification_no if supplier else '' }}"
+                   placeholder="例如：GSP-2021-0001">
         </div>
         
         <div class="form-actions">
@@ -48,6 +58,27 @@
         </div>
     </form>
 </div>
+
+<script>
+function validateSupplierForm() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    
+    if (!name) {
+        alert('请输入供应商名称');
+        return false;
+    }
+    
+    // 电话号码验证
+    if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
+        if (!confirm('手机号格式可能不正确，是否继续？')) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+</script>
 
 <style>
 .form-row {

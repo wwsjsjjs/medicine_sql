@@ -6,6 +6,7 @@
     <title>{% block title %}医药管理系统{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="{{ url_for('static', filename='js/test_data.js') }}"></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -68,6 +69,13 @@
                     </a>
                     <a href="{{ url_for('sales.report_week') }}" class="nav-item">
                         <span class="icon">📈</span> 销售报表
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">系统测试</div>
+                    <a href="{{ url_for('api_test.index') }}" class="nav-item">
+                        <span class="icon">🧪</span> API测试控制台
                     </a>
                 </div>
             </nav>
