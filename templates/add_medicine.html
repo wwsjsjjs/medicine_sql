@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>添加药品</title>
+</head>
+<body>
+    <h1>添加药品</h1>
+    <form method="post">
+        名称：<input type="text" name="name" required><br>
+        描述：<input type="text" name="description"><br>
+        库存：<input type="number" name="stock" min="0" value="0"><br>
+        <input type="submit" value="提交">
+    </form>
+    <a href="{{ url_for('index') }}">返回列表</a>
+</body>
+</html>

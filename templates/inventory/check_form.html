@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}添加盘点 - 医药管理系统{% endblock %}
+{% block page_title %}添加盘点{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>库存盘点</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="drug_id">药品 *</label>
+                <select id="drug_id" name="drug_id" class="form-control" required>
+                    <option value="">请选择药品</option>
+                    {% for drug in drugs %}
+                    <option value="{{ drug.drug_id }}">{{ drug.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="warehouse_id">仓库 *</label>
+                <select id="warehouse_id" name="warehouse_id" class="form-control" required>
+                    <option value="">请选择仓库</option>
+                    {% for warehouse in warehouses %}
+                    <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="checked_quantity">账面数量 *</label>
+                <input type="number" id="checked_quantity" name="checked_quantity" class="form-control" required min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="actual_quantity">实际数量 *</label>
+                <input type="number" id="actual_quantity" name="actual_quantity" class="form-control" required min="0">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="check_date">盘点日期 *</label>
+                <input type="date" id="check_date" name="check_date" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="diff_reason">差异原因</label>
+                <input type="text" id="diff_reason" name="diff_reason" class="form-control">
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">提交盘点</button>
+            <a href="{{ url_for('inventory.check_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.getElementById('check_date').valueAsDate = new Date();
+</script>
+{% endblock %}

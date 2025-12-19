@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}供应商管理 - 医药管理系统{% endblock %}
+{% block page_title %}供应商管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>供应商列表</h2>
+    <a href="{{ url_for('basic.supplier_add') }}" class="btn btn-primary">
+        ➕ 添加供应商
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>供应商名称</th>
+                <th>联系人</th>
+                <th>电话</th>
+                <th>地址</th>
+                <th>资质编号</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>{{ supplier.supplier_id }}</td>
+                <td><strong>{{ supplier.name }}</strong></td>
+                <td>{{ supplier.contact or '-' }}</td>
+                <td>{{ supplier.phone or '-' }}</td>
+                <td>{{ supplier.address or '-' }}</td>
+                <td>{{ supplier.qualification_no or '-' }}</td>
+                <td>{{ supplier.create_time.strftime('%Y-%m-%d') if supplier.create_time else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('basic.supplier_edit', supplier_id=supplier.supplier_id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('basic.supplier_delete', supplier_id=supplier.supplier_id) }}" 
+                       class="btn btn-sm btn-danger" 
+                       onclick="return confirm('确定要删除该供应商吗？');">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

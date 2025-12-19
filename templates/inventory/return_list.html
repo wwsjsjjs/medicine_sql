@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}退货处理 - 医药管理系统{% endblock %}
+{% block page_title %}退货处理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>退货列表</h2>
+    <a href="{{ url_for('inventory.return_add') }}" class="btn btn-primary">
+        ➕ 新增退货
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>退货ID</th>
+                <th>药品名称</th>
+                <th>供应商</th>
+                <th>退货数量</th>
+                <th>退货原因</th>
+                <th>退货日期</th>
+                <th>经办人</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for return_stock, drug_name, supplier_name, employee_name in returns %}
+            <tr>
+                <td>{{ return_stock.return_id }}</td>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ supplier_name }}</td>
+                <td>{{ return_stock.quantity }}</td>
+                <td>{{ return_stock.reason or '-' }}</td>
+                <td>{{ return_stock.return_date }}</td>
+                <td>{{ employee_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

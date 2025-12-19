@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{% if supplier %}编辑{% else %}添加{% endif %}供应商 - 医药管理系统{% endblock %}
+{% block page_title %}{% if supplier %}编辑{% else %}添加{% endif %}供应商{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if supplier %}编辑{% else %}添加{% endif %}供应商</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-group">
+            <label for="name">供应商名称 *</label>
+            <input type="text" id="name" name="name" class="form-control" 
+                   value="{{ supplier.name if supplier else '' }}" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact">联系人</label>
+                <input type="text" id="contact" name="contact" class="form-control" 
+                       value="{{ supplier.contact if supplier else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" id="phone" name="phone" class="form-control" 
+                       value="{{ supplier.phone if supplier else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="address">地址</label>
+            <input type="text" id="address" name="address" class="form-control" 
+                   value="{{ supplier.address if supplier else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="qualification_no">资质编号</label>
+            <input type="text" id="qualification_no" name="qualification_no" class="form-control" 
+                   value="{{ supplier.qualification_no if supplier else '' }}">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('basic.supplier_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

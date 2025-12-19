@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}添加销售退货 - 医药管理系统{% endblock %}
+{% block page_title %}添加销售退货{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>销售退货登记</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-group">
+            <label for="sales_id">原销售单 *</label>
+            <select id="sales_id" name="sales_id" class="form-control" required>
+                <option value="">请选择销售单</option>
+                {% for sale in sales_records %}
+                <option value="{{ sale.sales_id }}">
+                    #{{ sale.sales_id }} - {{ sale.sales_date }} - 数量:{{ sale.quantity }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="quantity">退货数量 *</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" required min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="return_date">退货日期 *</label>
+                <input type="date" id="return_date" name="return_date" class="form-control" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="reason">退货原因 *</label>
+            <textarea id="reason" name="reason" class="form-control" rows="3" required 
+                      placeholder="请填写退货原因，如质量问题、客户不满意等"></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">提交退货</button>
+            <a href="{{ url_for('sales.return_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.getElementById('return_date').valueAsDate = new Date();
+</script>
+{% endblock %}

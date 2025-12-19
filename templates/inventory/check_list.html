@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}库存盘点 - 医药管理系统{% endblock %}
+{% block page_title %}库存盘点{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>盘点记录</h2>
+    <a href="{{ url_for('inventory.check_add') }}" class="btn btn-primary">
+        ➕ 新增盘点
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>盘点ID</th>
+                <th>药品名称</th>
+                <th>仓库</th>
+                <th>账面数量</th>
+                <th>实际数量</th>
+                <th>差异</th>
+                <th>差异原因</th>
+                <th>盘点日期</th>
+                <th>经办人</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for check, drug_name, warehouse_name, employee_name in checks %}
+            <tr>
+                <td>{{ check.check_id }}</td>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ warehouse_name }}</td>
+                <td>{{ check.checked_quantity }}</td>
+                <td>{{ check.actual_quantity }}</td>
+                <td class="{% if check.checked_quantity != check.actual_quantity %}text-danger{% endif %}">
+                    {{ check.actual_quantity - check.checked_quantity }}
+                </td>
+                <td>{{ check.diff_reason or '-' }}</td>
+                <td>{{ check.check_date }}</td>
+                <td>{{ employee_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

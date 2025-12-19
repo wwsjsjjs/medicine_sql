@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}添加销售 - 医药管理系统{% endblock %}
+{% block page_title %}添加销售{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>销售登记</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="drug_id">药品 *</label>
+                <select id="drug_id" name="drug_id" class="form-control" required>
+                    <option value="">请选择药品</option>
+                    {% for drug in drugs %}
+                    <option value="{{ drug.drug_id }}" data-price="{{ drug.sale_price }}">
+                        {{ drug.name }} - ¥{{ "%.2f"|format(drug.sale_price) }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="customer_id">客户 *</label>
+                <select id="customer_id" name="customer_id" class="form-control" required>
+                    <option value="">请选择客户</option>
+                    {% for customer in customers %}
+                    <option value="{{ customer.customer_id }}">{{ customer.name }} ({{ customer.type }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="quantity">数量 *</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" required min="1" value="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="unit_price">单价 *</label>
+                <input type="number" step="0.01" id="unit_price" name="unit_price" class="form-control" required min="0" readonly>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sales_date">销售日期 *</label>
+                <input type="date" id="sales_date" name="sales_date" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label>总价</label>
+                <input type="text" id="total_display" class="form-control" readonly>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">提交销售</button>
+            <a href="{{ url_for('sales.sales_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// 自动填充单价
+document.getElementById('drug_id').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const price = selectedOption.getAttribute('data-price');
+    document.getElementById('unit_price').value = price || '';
+    calculateTotal();
+});
+
+// 计算总价
+function calculateTotal() {
+    const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+    const unitPrice = parseFloat(document.getElementById('unit_price').value) || 0;
+    const total = quantity * unitPrice;
+    document.getElementById('total_display').value = '¥' + total.toFixed(2);
+}
+
+document.getElementById('quantity').addEventListener('input', calculateTotal);
+document.getElementById('unit_price').addEventListener('input', calculateTotal);
+
+// 设置默认日期为今天
+document.getElementById('sales_date').valueAsDate = new Date();
+</script>
+{% endblock %}

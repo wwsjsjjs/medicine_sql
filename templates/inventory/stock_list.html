@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}库存查询 - 医药管理系统{% endblock %}
+{% block page_title %}库存查询{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>库存列表</h2>
+    <div>
+        <a href="{{ url_for('inventory.stock_low') }}" class="btn btn-warning">
+            ⚠️ 库存预警
+        </a>
+        <a href="{{ url_for('inventory.stock_in_add') }}" class="btn btn-primary">
+            ➕ 入库登记
+        </a>
+    </div>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>药品名称</th>
+                <th>仓库</th>
+                <th>库存数量</th>
+                <th>单位</th>
+                <th>货位</th>
+                <th>最后盘点日期</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory, drug_name, unit, warehouse_name in stocks %}
+            <tr>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ warehouse_name }}</td>
+                <td class="{% if inventory.quantity < 50 %}text-danger{% elif inventory.quantity < 100 %}text-warning{% endif %}">
+                    <strong>{{ inventory.quantity }}</strong>
+                </td>
+                <td>{{ unit }}</td>
+                <td>{{ inventory.location or '-' }}</td>
+                <td>{{ inventory.last_check_date or '-' }}</td>
+                <td>
+                    {% if inventory.quantity < 50 %}
+                        <span class="badge badge-danger">严重不足</span>
+                    {% elif inventory.quantity < 100 %}
+                        <span class="badge badge-warning">库存较低</span>
+                    {% else %}
+                        <span class="badge badge-success">库存正常</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

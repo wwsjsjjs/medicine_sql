@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{% if drug %}编辑{% else %}添加{% endif %}药品 - 医药管理系统{% endblock %}
+{% block page_title %}{% if drug %}编辑{% else %}添加{% endif %}药品{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if drug %}编辑{% else %}添加{% endif %}药品</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">药品名称 *</label>
+                <input type="text" id="name" name="name" class="form-control" 
+                       value="{{ drug.name if drug else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="spec">规格</label>
+                <input type="text" id="spec" name="spec" class="form-control" 
+                       value="{{ drug.spec if drug else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="manufacturer">生产厂家</label>
+                <input type="text" id="manufacturer" name="manufacturer" class="form-control" 
+                       value="{{ drug.manufacturer if drug else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="approval_number">批准文号</label>
+                <input type="text" id="approval_number" name="approval_number" class="form-control" 
+                       value="{{ drug.approval_number if drug else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">类别</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="处方" {% if drug and drug.category == '处方' %}selected{% endif %}>处方</option>
+                    <option value="非处方" {% if drug and drug.category == '非处方' %}selected{% endif %}>非处方</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="unit">单位</label>
+                <input type="text" id="unit" name="unit" class="form-control" 
+                       value="{{ drug.unit if drug else '' }}" placeholder="盒/瓶/片">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="purchase_price">进货价</label>
+                <input type="number" step="0.01" id="purchase_price" name="purchase_price" class="form-control" 
+                       value="{{ drug.purchase_price if drug else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="sale_price">销售价</label>
+                <input type="number" step="0.01" id="sale_price" name="sale_price" class="form-control" 
+                       value="{{ drug.sale_price if drug else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="expiry_date">有效期</label>
+                <input type="date" id="expiry_date" name="expiry_date" class="form-control" 
+                       value="{{ drug.expiry_date if drug else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="status">状态</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="在售" {% if drug and drug.status == '在售' %}selected{% endif %}>在售</option>
+                    <option value="下架" {% if drug and drug.status == '下架' %}selected{% endif %}>下架</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('basic.drug_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}入库登记 - 医药管理系统{% endblock %}
+{% block page_title %}入库登记{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>入库列表</h2>
+    <a href="{{ url_for('inventory.stock_in_add') }}" class="btn btn-primary">
+        ➕ 新增入库
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>入库单号</th>
+                <th>药品名称</th>
+                <th>供应商</th>
+                <th>数量</th>
+                <th>单价</th>
+                <th>总价</th>
+                <th>入库日期</th>
+                <th>经办人</th>
+                <th>备注</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock_in, drug_name, supplier_name, employee_name in stock_ins %}
+            <tr>
+                <td>#{{ stock_in.stock_in_id }}</td>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ supplier_name }}</td>
+                <td>{{ stock_in.quantity }}</td>
+                <td>¥{{ "%.2f"|format(stock_in.unit_price) }}</td>
+                <td><strong>¥{{ "%.2f"|format(stock_in.total_price) }}</strong></td>
+                <td>{{ stock_in.stock_in_date }}</td>
+                <td>{{ employee_name }}</td>
+                <td>{{ stock_in.remark or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

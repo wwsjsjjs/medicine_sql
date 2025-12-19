@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}销售登记 - 医药管理系统{% endblock %}
+{% block page_title %}销售登记{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>销售列表</h2>
+    <a href="{{ url_for('sales.sales_add') }}" class="btn btn-primary">
+        ➕ 新增销售
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>销售单号</th>
+                <th>药品名称</th>
+                <th>客户</th>
+                <th>数量</th>
+                <th>单价</th>
+                <th>总价</th>
+                <th>销售日期</th>
+                <th>经办人</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale, drug_name, customer_name, employee_name in sales_list %}
+            <tr>
+                <td>#{{ sale.sales_id }}</td>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ customer_name }}</td>
+                <td>{{ sale.quantity }}</td>
+                <td>¥{{ "%.2f"|format(sale.unit_price) }}</td>
+                <td><strong>¥{{ "%.2f"|format(sale.total_price) }}</strong></td>
+                <td>{{ sale.sales_date }}</td>
+                <td>{{ employee_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

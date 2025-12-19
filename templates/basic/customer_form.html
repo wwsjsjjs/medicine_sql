@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{% if customer %}编辑{% else %}添加{% endif %}客户 - 医药管理系统{% endblock %}
+{% block page_title %}{% if customer %}编辑{% else %}添加{% endif %}客户{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if customer %}编辑{% else %}添加{% endif %}客户</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">客户名称 *</label>
+                <input type="text" id="name" name="name" class="form-control" 
+                       value="{{ customer.name if customer else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="type">类型</label>
+                <select id="type" name="type" class="form-control">
+                    <option value="零售" {% if customer and customer.type == '零售' %}selected{% endif %}>零售</option>
+                    <option value="批发" {% if customer and customer.type == '批发' %}selected{% endif %}>批发</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="contact">联系人</label>
+                <input type="text" id="contact" name="contact" class="form-control" 
+                       value="{{ customer.contact if customer else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" id="phone" name="phone" class="form-control" 
+                       value="{{ customer.phone if customer else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="address">地址</label>
+            <input type="text" id="address" name="address" class="form-control" 
+                   value="{{ customer.address if customer else '' }}">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('basic.customer_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

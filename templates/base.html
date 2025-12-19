@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}医药管理系统{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>🏥 医药管理系统</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('dashboard.index') }}" class="nav-item">
+                    <span class="icon">📊</span> 数据仪表盘
+                </a>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">基础信息管理</div>
+                    <a href="{{ url_for('basic.drug_list') }}" class="nav-item">
+                        <span class="icon">💊</span> 药品管理
+                    </a>
+                    <a href="{{ url_for('basic.employee_list') }}" class="nav-item">
+                        <span class="icon">👥</span> 员工管理
+                    </a>
+                    <a href="{{ url_for('basic.customer_list') }}" class="nav-item">
+                        <span class="icon">🏪</span> 客户管理
+                    </a>
+                    <a href="{{ url_for('basic.supplier_list') }}" class="nav-item">
+                        <span class="icon">🏭</span> 供应商管理
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">库存管理</div>
+                    <a href="{{ url_for('inventory.stock_in_list') }}" class="nav-item">
+                        <span class="icon">📥</span> 入库登记
+                    </a>
+                    <a href="{{ url_for('inventory.stock_list') }}" class="nav-item">
+                        <span class="icon">📦</span> 库存查询
+                    </a>
+                    <a href="{{ url_for('inventory.warehouse_list') }}" class="nav-item">
+                        <span class="icon">🏢</span> 仓库管理
+                    </a>
+                    <a href="{{ url_for('inventory.check_list') }}" class="nav-item">
+                        <span class="icon">✅</span> 库存盘点
+                    </a>
+                    <a href="{{ url_for('inventory.return_list') }}" class="nav-item">
+                        <span class="icon">↩️</span> 退货处理
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">销售管理</div>
+                    <a href="{{ url_for('sales.sales_list') }}" class="nav-item">
+                        <span class="icon">💰</span> 销售登记
+                    </a>
+                    <a href="{{ url_for('sales.return_list') }}" class="nav-item">
+                        <span class="icon">🔄</span> 销售退货
+                    </a>
+                    <a href="{{ url_for('sales.finance_list') }}" class="nav-item">
+                        <span class="icon">💵</span> 财务统计
+                    </a>
+                    <a href="{{ url_for('sales.report_week') }}" class="nav-item">
+                        <span class="icon">📈</span> 销售报表
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <h1>{% block page_title %}{% endblock %}</h1>
+                </div>
+                <div class="header-right">
+                    <span class="user-info">👤 管理员</span>
+                    <span class="datetime" id="datetime"></span>
+                </div>
+            </header>
+            
+            <!-- Flash消息提示 -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 更新时间显示
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN');
+            const timeStr = now.toLocaleTimeString('zh-CN');
+            document.getElementById('datetime').textContent = `${dateStr} ${timeStr}`;
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // 自动隐藏Flash消息
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 3000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

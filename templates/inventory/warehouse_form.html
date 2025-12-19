@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{% if warehouse %}编辑{% else %}添加{% endif %}仓库 - 医药管理系统{% endblock %}
+{% block page_title %}{% if warehouse %}编辑{% else %}添加{% endif %}仓库{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if warehouse %}编辑{% else %}添加{% endif %}仓库</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-group">
+            <label for="name">仓库名称 *</label>
+            <input type="text" id="name" name="name" class="form-control" 
+                   value="{{ warehouse.name if warehouse else '' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="address">地址</label>
+            <input type="text" id="address" name="address" class="form-control" 
+                   value="{{ warehouse.address if warehouse else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="manager_id">负责人 *</label>
+            <select id="manager_id" name="manager_id" class="form-control" required>
+                <option value="">请选择负责人</option>
+                {% for employee in employees %}
+                <option value="{{ employee.employee_id }}" 
+                        {% if warehouse and warehouse.manager_id == employee.employee_id %}selected{% endif %}>
+                    {{ employee.name }} - {{ employee.department }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('inventory.warehouse_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

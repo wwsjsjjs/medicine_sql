@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}库存预警 - 医药管理系统{% endblock %}
+{% block page_title %}库存预警 (库存 < 100){% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>低库存药品列表</h2>
+    <a href="{{ url_for('inventory.stock_list') }}" class="btn btn-secondary">
+        返回库存列表
+    </a>
+</div>
+
+<div class="table-card">
+    <div style="padding:20px; background:#fff3cd; border-left:4px solid #ffc107; margin-bottom:20px; border-radius:8px;">
+        <strong>⚠️ 库存预警提示</strong>
+        <p style="margin:10px 0 0 0; color:#856404;">
+            以下药品库存不足100，请及时补货！严重不足（<50）的药品需优先处理。
+        </p>
+    </div>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>药品名称</th>
+                <th>仓库</th>
+                <th>当前库存</th>
+                <th>单位</th>
+                <th>货位</th>
+                <th>最后盘点</th>
+                <th>预警级别</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory, drug_name, unit, warehouse_name in stocks %}
+            <tr>
+                <td><strong>{{ drug_name }}</strong></td>
+                <td>{{ warehouse_name }}</td>
+                <td class="{% if inventory.quantity < 50 %}text-danger{% else %}text-warning{% endif %}">
+                    <strong style="font-size:18px;">{{ inventory.quantity }}</strong>
+                </td>
+                <td>{{ unit }}</td>
+                <td>{{ inventory.location or '-' }}</td>
+                <td>{{ inventory.last_check_date or '-' }}</td>
+                <td>
+                    {% if inventory.quantity < 50 %}
+                        <span class="badge badge-danger">🔴 严重不足</span>
+                    {% else %}
+                        <span class="badge badge-warning">🟡 库存较低</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('inventory.stock_in_add') }}" class="btn btn-sm btn-primary">立即补货</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if not stocks %}
+    <div style="text-align:center; padding:40px; color:#718096;">
+        <div style="font-size:48px;">✓</div>
+        <p>暂无低库存药品，库存状态良好！</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

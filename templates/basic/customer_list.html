@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}客户管理 - 医药管理系统{% endblock %}
+{% block page_title %}客户管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>客户列表</h2>
+    <a href="{{ url_for('basic.customer_add') }}" class="btn btn-primary">
+        ➕ 添加客户
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>客户名称</th>
+                <th>类型</th>
+                <th>联系人</th>
+                <th>电话</th>
+                <th>地址</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.customer_id }}</td>
+                <td><strong>{{ customer.name }}</strong></td>
+                <td>
+                    {% if customer.type == '批发' %}
+                        <span class="badge badge-primary">批发</span>
+                    {% else %}
+                        <span class="badge badge-success">零售</span>
+                    {% endif %}
+                </td>
+                <td>{{ customer.contact or '-' }}</td>
+                <td>{{ customer.phone or '-' }}</td>
+                <td>{{ customer.address or '-' }}</td>
+                <td>{{ customer.create_time.strftime('%Y-%m-%d') if customer.create_time else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('basic.customer_edit', customer_id=customer.customer_id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('basic.customer_delete', customer_id=customer.customer_id) }}" 
+                       class="btn btn-sm btn-danger" 
+                       onclick="return confirm('确定要删除该客户吗？');">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.badge-primary {
+    background: #3182ce;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

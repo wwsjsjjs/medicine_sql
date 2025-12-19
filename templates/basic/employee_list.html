@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}员工管理 - 医药管理系统{% endblock %}
+{% block page_title %}员工管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>员工列表</h2>
+    <a href="{{ url_for('basic.employee_add') }}" class="btn btn-primary">
+        ➕ 添加员工
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>部门</th>
+                <th>职位</th>
+                <th>电话</th>
+                <th>入职日期</th>
+                <th>账号</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td>{{ emp.employee_id }}</td>
+                <td><strong>{{ emp.name }}</strong></td>
+                <td>{{ emp.department or '-' }}</td>
+                <td>{{ emp.position or '-' }}</td>
+                <td>{{ emp.phone or '-' }}</td>
+                <td>{{ emp.hire_date or '-' }}</td>
+                <td>{{ emp.account or '-' }}</td>
+                <td>
+                    {% if emp.status == '在职' %}
+                        <span class="badge badge-success">在职</span>
+                    {% else %}
+                        <span class="badge badge-danger">离职</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('basic.employee_edit', employee_id=emp.employee_id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('basic.employee_delete', employee_id=emp.employee_id) }}" 
+                       class="btn btn-sm btn-danger" 
+                       onclick="return confirm('确定要删除该员工吗？');">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

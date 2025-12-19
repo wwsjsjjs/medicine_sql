@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{% if employee %}编辑{% else %}添加{% endif %}员工 - 医药管理系统{% endblock %}
+{% block page_title %}{% if employee %}编辑{% else %}添加{% endif %}员工{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if employee %}编辑{% else %}添加{% endif %}员工</h2>
+</div>
+
+<div class="table-card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">姓名 *</label>
+                <input type="text" id="name" name="name" class="form-control" 
+                       value="{{ employee.name if employee else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="department">部门</label>
+                <select id="department" name="department" class="form-control">
+                    <option value="">请选择</option>
+                    <option value="销售部" {% if employee and employee.department == '销售部' %}selected{% endif %}>销售部</option>
+                    <option value="采购部" {% if employee and employee.department == '采购部' %}selected{% endif %}>采购部</option>
+                    <option value="仓储部" {% if employee and employee.department == '仓储部' %}selected{% endif %}>仓储部</option>
+                    <option value="财务部" {% if employee and employee.department == '财务部' %}selected{% endif %}>财务部</option>
+                    <option value="行政部" {% if employee and employee.department == '行政部' %}selected{% endif %}>行政部</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="position">职位</label>
+                <input type="text" id="position" name="position" class="form-control" 
+                       value="{{ employee.position if employee else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" id="phone" name="phone" class="form-control" 
+                       value="{{ employee.phone if employee else '' }}">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="hire_date">入职日期</label>
+                <input type="date" id="hire_date" name="hire_date" class="form-control" 
+                       value="{{ employee.hire_date if employee else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="status">状态</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="在职" {% if employee and employee.status == '在职' %}selected{% endif %}>在职</option>
+                    <option value="离职" {% if employee and employee.status == '离职' %}selected{% endif %}>离职</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="account">账号</label>
+                <input type="text" id="account" name="account" class="form-control" 
+                       value="{{ employee.account if employee else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码 {% if employee %}(留空则不修改){% endif %}</label>
+                <input type="password" id="password" name="password" class="form-control">
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('basic.employee_list') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

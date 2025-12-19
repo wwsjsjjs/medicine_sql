@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}仓库管理 - 医药管理系统{% endblock %}
+{% block page_title %}仓库管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>仓库列表</h2>
+    <a href="{{ url_for('inventory.warehouse_add') }}" class="btn btn-primary">
+        ➕ 添加仓库
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>仓库ID</th>
+                <th>仓库名称</th>
+                <th>地址</th>
+                <th>负责人</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for warehouse, manager_name in warehouses %}
+            <tr>
+                <td>{{ warehouse.warehouse_id }}</td>
+                <td><strong>{{ warehouse.name }}</strong></td>
+                <td>{{ warehouse.address or '-' }}</td>
+                <td>{{ manager_name }}</td>
+                <td>{{ warehouse.create_time.strftime('%Y-%m-%d') if warehouse.create_time else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('inventory.warehouse_edit', warehouse_id=warehouse.warehouse_id) }}" class="btn btn-sm btn-warning">编辑</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}药品管理 - 医药管理系统{% endblock %}
+{% block page_title %}药品管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>药品列表</h2>
+    <a href="{{ url_for('basic.drug_add') }}" class="btn btn-primary">
+        ➕ 添加药品
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>药品名称</th>
+                <th>规格</th>
+                <th>生产厂家</th>
+                <th>类别</th>
+                <th>单位</th>
+                <th>进货价</th>
+                <th>销售价</th>
+                <th>有效期</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for drug in drugs %}
+            <tr>
+                <td>{{ drug.drug_id }}</td>
+                <td><strong>{{ drug.name }}</strong></td>
+                <td>{{ drug.spec or '-' }}</td>
+                <td>{{ drug.manufacturer or '-' }}</td>
+                <td>
+                    {% if drug.category == '处方' %}
+                        <span class="badge badge-warning">处方</span>
+                    {% else %}
+                        <span class="badge badge-success">非处方</span>
+                    {% endif %}
+                </td>
+                <td>{{ drug.unit or '-' }}</td>
+                <td>¥{{ "%.2f"|format(drug.purchase_price or 0) }}</td>
+                <td>¥{{ "%.2f"|format(drug.sale_price or 0) }}</td>
+                <td>{{ drug.expiry_date or '-' }}</td>
+                <td>
+                    {% if drug.status == '在售' %}
+                        <span class="badge badge-success">在售</span>
+                    {% else %}
+                        <span class="badge badge-danger">下架</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('basic.drug_edit', drug_id=drug.drug_id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('basic.drug_delete', drug_id=drug.drug_id) }}" 
+                       class="btn btn-sm btn-danger" 
+                       onclick="return confirm('确定要删除该药品吗？');">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
