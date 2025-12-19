@@ -3,8 +3,8 @@
 提供测试数据生成、批量操作测试等功能
 """
 
-from flask import Blueprint, jsonify, request, render_template
-from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo
+from flask import Blueprint, jsonify, request, render_template, session
+from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo, log_system_action
 from models import StockIn, Sales, Inventory, Warehouse, ReturnStock, SalesReturn, InventoryCheck, FinanceStat
 from datetime import datetime, timedelta
 from sqlalchemy import func
@@ -71,8 +71,9 @@ def _test_create_drug(commit=True):
         if commit:
             db.session.commit()
             log_success(f"创建药品成功: {drug.name} (ID: {drug.drug_id})")
-        
-        return {'success': True, 'message': '创建药品测试通过', 'data': {'drug_id': drug.drug_id, 'name': drug.name}}
+            log_system_action(session.get('employee_id'), 'insert', 'drug_info', {'drug_id': drug.drug_id, 'name': drug.name})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '创建药品测试通过', 'data': {'drug_id': drug.drug_id, 'name': drug.name}})
     except Exception as e:
         return handle_error(e, "创建药品测试")
 
@@ -95,8 +96,9 @@ def _test_create_supplier(commit=True):
         if commit:
             db.session.commit()
             log_success(f"创建供应商成功: {supplier.name} (ID: {supplier.supplier_id})")
-            
-        return {'success': True, 'message': '创建供应商测试通过', 'data': {'supplier_id': supplier.supplier_id, 'name': supplier.name}}
+            log_system_action(session.get('employee_id'), 'insert', 'supplier_info', {'supplier_id': supplier.supplier_id, 'name': supplier.name})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '创建供应商测试通过', 'data': {'supplier_id': supplier.supplier_id, 'name': supplier.name}})
     except Exception as e:
         return handle_error(e, "创建供应商测试")
 
@@ -119,8 +121,9 @@ def _test_create_customer(commit=True):
         if commit:
             db.session.commit()
             log_success(f"创建客户成功: {customer.name} (ID: {customer.customer_id})")
-            
-        return {'success': True, 'message': '创建客户测试通过', 'data': {'customer_id': customer.customer_id, 'name': customer.name}}
+            log_system_action(session.get('employee_id'), 'insert', 'customer_info', {'customer_id': customer.customer_id, 'name': customer.name})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '创建客户测试通过', 'data': {'customer_id': customer.customer_id, 'name': customer.name}})
     except Exception as e:
         return handle_error(e, "创建客户测试")
 
@@ -152,8 +155,9 @@ def _test_create_warehouse(commit=True):
         if commit:
             db.session.commit()
             log_success(f"创建仓库成功: {warehouse.name} (ID: {warehouse.warehouse_id})")
-            
-        return {'success': True, 'message': '创建仓库测试通过', 'data': {'warehouse_id': warehouse.warehouse_id, 'name': warehouse.name}}
+            log_system_action(session.get('employee_id'), 'insert', 'warehouse', {'warehouse_id': warehouse.warehouse_id, 'name': warehouse.name})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '创建仓库测试通过', 'data': {'warehouse_id': warehouse.warehouse_id, 'name': warehouse.name}})
     except Exception as e:
         return handle_error(e, "创建仓库测试")
 
@@ -206,7 +210,6 @@ def _test_stock_in(drug_id=None, supplier_id=None, warehouse_id=None, commit=Tru
             remark="自动化测试入库"
         )
         db.session.add(stock_in)
-        
         # 2. 更新库存
         inventory = Inventory.query.filter_by(drug_id=drug_id, warehouse_id=warehouse_id).first()
         if inventory:
@@ -220,12 +223,12 @@ def _test_stock_in(drug_id=None, supplier_id=None, warehouse_id=None, commit=Tru
                 update_time=datetime.now()
             )
             db.session.add(inventory)
-            
         if commit:
             db.session.commit()
             log_success(f"入库测试成功: 药品ID {drug_id}, 数量 {quantity}")
-            
-        return {'success': True, 'message': '入库流程测试通过', 'data': {'stock_in_id': stock_in.stock_in_id}}
+            log_system_action(session.get('employee_id'), 'insert', 'stock_in', {'stock_in_id': stock_in.stock_in_id, 'drug_id': drug_id, 'quantity': quantity})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '入库流程测试通过', 'data': {'stock_in_id': stock_in.stock_in_id}})
     except Exception as e:
         return handle_error(e, "入库流程测试")
 
@@ -277,16 +280,15 @@ def _test_sales(drug_id=None, customer_id=None, warehouse_id=None, commit=True):
             employee_id=1
         )
         db.session.add(sale)
-        
         # 2. 扣减库存
         inventory.quantity -= quantity
         inventory.update_time = datetime.now()
-        
         if commit:
             db.session.commit()
             log_success(f"销售测试成功: 药品ID {drug_id}, 数量 {quantity}")
-            
-        return {'success': True, 'message': '销售流程测试通过', 'data': {'sales_id': sale.sales_id}}
+            log_system_action(session.get('employee_id'), 'insert', 'sales', {'sales_id': sale.sales_id, 'drug_id': drug_id, 'quantity': quantity})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '销售流程测试通过', 'data': {'sales_id': sale.sales_id}})
     except Exception as e:
         return handle_error(e, "销售流程测试")
 
@@ -316,11 +318,10 @@ def _test_finance_stat(commit=True):
                 total_profit=profit
             )
             db.session.add(stat)
-            
         if commit:
             db.session.commit()
             log_success(f"财务统计测试成功: 销售额 {sales_total}, 成本 {cost_total}")
-            
+            log_system_action(session.get('employee_id'), 'insert', 'finance_stat', {'stat_id': stat.stat_id, 'date': str(today)})
         return {'success': True, 'message': '财务统计测试通过', 'data': {'stat_id': stat.stat_id}}
     except Exception as e:
         return handle_error(e, "财务统计测试")
@@ -550,9 +551,15 @@ def route_stats():
             'drugs': db.session.query(func.count(DrugInfo.drug_id)).scalar(),
             'customers': db.session.query(func.count(CustomerInfo.customer_id)).scalar(),
             'suppliers': db.session.query(func.count(SupplierInfo.supplier_id)).scalar(),
+            'employees': db.session.query(func.count(EmployeeInfo.employee_id)).scalar(),
+            'warehouses': db.session.query(func.count(Warehouse.warehouse_id)).scalar(),
             'total_inventory': db.session.query(func.sum(Inventory.quantity)).scalar() or 0,
             'stock_ins': db.session.query(func.count(StockIn.stock_in_id)).scalar(),
-            'sales': db.session.query(func.count(Sales.sales_id)).scalar()
+            'sales': db.session.query(func.count(Sales.sales_id)).scalar(),
+            'returns': db.session.query(func.count(ReturnStock.return_id)).scalar(),
+            'sales_returns': db.session.query(func.count(SalesReturn.sales_return_id)).scalar(),
+            'inventory_checks': db.session.query(func.count(InventoryCheck.check_id)).scalar(),
+            'finance_stats': db.session.query(func.count(FinanceStat.stat_id)).scalar()
         }
         return jsonify({'success': True, 'data': stats})
     except Exception as e:
@@ -560,73 +567,66 @@ def route_stats():
 
 @api_test_bp.route('/generate_drug', methods=['POST'])
 def route_generate_drug():
-    count = request.json.get('count', 5)
-    success_count = 0
-    for _ in range(count):
-        if _test_create_drug()['success']:
-            success_count += 1
-    return jsonify({'success': True, 'message': f'成功生成 {success_count} 条药品数据'})
+    res = _test_create_drug()
+    data = res.get_json() if hasattr(res, 'get_json') else res
+    return jsonify({'success': data['success'], 'message': data['message']})
 
 @api_test_bp.route('/generate_customer', methods=['POST'])
 def route_generate_customer():
-    count = request.json.get('count', 5)
-    success_count = 0
-    for _ in range(count):
-        if _test_create_customer()['success']:
-            success_count += 1
-    return jsonify({'success': True, 'message': f'成功生成 {success_count} 条客户数据'})
+    res = _test_create_customer()
+    data = res.get_json() if hasattr(res, 'get_json') else res
+    return jsonify({'success': data['success'], 'message': data['message']})
 
 @api_test_bp.route('/generate_employee', methods=['POST'])
 def route_generate_employee():
-    count = request.json.get('count', 5)
-    success_count = 0
     try:
-        for _ in range(count):
-            name = f"测试员工_{random.randint(1000, 9999)}"
-            employee = EmployeeInfo(
-                name=name,
-                account=f"user_{random.randint(10000, 99999)}",
-                password="password",
-                phone=f"136{random.randint(10000000, 99999999)}",
-                department="测试部门",
-                position="员工"
-            )
-            db.session.add(employee)
-            success_count += 1
+        name = f"测试员工_{random.randint(1000, 9999)}"
+        employee = EmployeeInfo(
+            name=name,
+            account=f"user_{random.randint(10000, 99999)}",
+            password="password",
+            phone=f"136{random.randint(10000000, 99999999)}",
+            department="测试部门",
+            position="员工"
+        )
+        db.session.add(employee)
         db.session.commit()
-        return jsonify({'success': True, 'message': f'成功生成 {success_count} 条员工数据'})
+        return jsonify({'success': True, 'message': f'员工 {name} 已生成'})
     except Exception as e:
         return handle_error(e, "生成员工数据")
 
 @api_test_bp.route('/generate_supplier', methods=['POST'])
 def route_generate_supplier():
-    count = request.json.get('count', 3)
-    success_count = 0
-    for _ in range(count):
-        if _test_create_supplier()['success']:
-            success_count += 1
-    return jsonify({'success': True, 'message': f'成功生成 {success_count} 条供应商数据'})
+    res = _test_create_supplier()
+    data = res.get_json() if hasattr(res, 'get_json') else res
+    return jsonify({'success': data['success'], 'message': data['message']})
 
 @api_test_bp.route('/generate_warehouse', methods=['POST'])
 def route_generate_warehouse():
-    count = request.json.get('count', 3)
-    success_count = 0
-    for _ in range(count):
-        if _test_create_warehouse()['success']:
-            success_count += 1
-    return jsonify({'success': True, 'message': f'成功生成 {success_count} 条仓库数据'})
-
-@api_test_bp.route('/batch_stock_in', methods=['POST'])
-def route_batch_stock_in():
-    count = request.json.get('count', 10)
-    success_count = 0
-    for _ in range(count):
-        if _test_stock_in()['success']:
-            success_count += 1
-    return jsonify({'success': True, 'message': f'成功执行 {success_count} 次入库操作'})
-
-@api_test_bp.route('/batch_sales', methods=['POST'])
-def route_batch_sales():
+    # 检查是否有员工可作为管理员
+    manager = EmployeeInfo.query.first()
+    if not manager:
+        return jsonify({'success': False, 'message': '请先生成员工数据，是否自动生成？'})
+    res = _test_create_warehouse()
+    return jsonify({'success': res.json['success'], 'message': res.json['message']})
+    try:
+        stats = {
+            'drugs': db.session.query(func.count(DrugInfo.drug_id)).scalar(),
+            'customers': db.session.query(func.count(CustomerInfo.customer_id)).scalar(),
+            'suppliers': db.session.query(func.count(SupplierInfo.supplier_id)).scalar(),
+            'employees': db.session.query(func.count(EmployeeInfo.employee_id)).scalar(),
+            'warehouses': db.session.query(func.count(Warehouse.warehouse_id)).scalar(),
+            'total_inventory': db.session.query(func.sum(Inventory.quantity)).scalar() or 0,
+            'stock_ins': db.session.query(func.count(StockIn.stock_in_id)).scalar(),
+            'sales': db.session.query(func.count(Sales.sales_id)).scalar(),
+            'returns': db.session.query(func.count(ReturnStock.return_id)).scalar(),
+            'sales_returns': db.session.query(func.count(SalesReturn.sales_return_id)).scalar(),
+            'inventory_checks': db.session.query(func.count(InventoryCheck.check_id)).scalar(),
+            'finance_stats': db.session.query(func.count(FinanceStat.stat_id)).scalar()
+        }
+        return jsonify({'success': True, 'data': stats})
+    except Exception as e:
+        return handle_error(e, "获取统计信息", rollback=False)
     count = request.json.get('count', 10)
     success_count = 0
     for _ in range(count):
@@ -639,36 +639,26 @@ def route_batch_return_stock():
     count = request.json.get('count', 5)
     success_count = 0
     try:
-        # 获取一些入库记录
-        stock_ins = StockIn.query.limit(count).all()
-        if not stock_ins:
+        stockins = StockIn.query.limit(count).all()
+        if not stockins:
             return jsonify({'success': False, 'message': '没有可退货的入库记录'})
-            
-        for stock_in in stock_ins:
-            # 获取可退货数量（测试时退少量，最多5个）
-            return_qty = min(stock_in.quantity // 5, 5)
-            if return_qty <= 0:
-                return_qty = 1
-            
-            # 检查库存是否足够
-            inventory = Inventory.query.filter_by(drug_id=stock_in.drug_id).first()
-            if not inventory or inventory.quantity < return_qty:
-                continue
-            
+        for stockin in stockins:
+            # 随机退货数量1-5，允许重复退货
+            return_quantity = random.randint(1, 5)
             return_stock = ReturnStock(
-                drug_id=stock_in.drug_id,
-                supplier_id=stock_in.supplier_id,
-                quantity=return_qty,
+                drug_id=stockin.drug_id,
+                supplier_id=stockin.supplier_id,
+                quantity=return_quantity,
                 reason="测试退货",
                 return_date=datetime.now().date(),
                 employee_id=1
             )
             db.session.add(return_stock)
-            
-            # 更新库存
-            inventory.quantity -= return_qty
-            success_count += 1
-        
+            # 更新库存（StockIn没有warehouse_id，从该药品的任意仓库扣减库存）
+            inventory = Inventory.query.filter_by(drug_id=stockin.drug_id).filter(Inventory.quantity >= return_quantity).first()
+            if inventory:
+                inventory.quantity -= return_quantity
+                success_count += 1
         db.session.commit()
         return jsonify({'success': True, 'message': f'成功执行 {success_count} 次退货操作'})
     except Exception as e:
@@ -995,3 +985,23 @@ def full_chain_test():
         })
     except Exception as e:
         return handle_error(e, "全链路测试")
+
+@api_test_bp.route('/batch_stock_in', methods=['POST'])
+def route_batch_stock_in():
+    try:
+        # 简单批量生成1条入库数据
+        res = _test_stock_in()
+        data = res.get_json() if hasattr(res, 'get_json') else res
+        return jsonify({'success': data['success'], 'message': data['message']})
+    except Exception as e:
+        return handle_error(e, "批量入库测试")
+
+@api_test_bp.route('/batch_sales', methods=['POST'])
+def route_batch_sales():
+    try:
+        # 简单批量生成1条销售数据
+        res = _test_sales()
+        data = res.get_json() if hasattr(res, 'get_json') else res
+        return jsonify({'success': data['success'], 'message': data['message']})
+    except Exception as e:
+        return handle_error(e, "批量销售测试")

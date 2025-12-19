@@ -22,6 +22,14 @@
                 <div class="stat-value" id="stat-suppliers">-</div>
             </div>
             <div class="stat-card">
+                <div class="stat-label">员工数量</div>
+                <div class="stat-value" id="stat-employees">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">仓库数量</div>
+                <div class="stat-value" id="stat-warehouses">-</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-label">总库存</div>
                 <div class="stat-value" id="stat-inventory">-</div>
             </div>
@@ -32,6 +40,22 @@
             <div class="stat-card">
                 <div class="stat-label">销售记录</div>
                 <div class="stat-value" id="stat-sales">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">退货记录</div>
+                <div class="stat-value" id="stat-returns">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">销售退货</div>
+                <div class="stat-value" id="stat-salesreturns">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">库存盘点</div>
+                <div class="stat-value" id="stat-invchecks">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">财务统计</div>
+                <div class="stat-value" id="stat-financestats">-</div>
             </div>
         </div>
         <button onclick="loadStats()" class="btn btn-secondary">🔄 刷新统计</button>
@@ -44,39 +68,30 @@
             <div class="action-group">
                 <label>生成药品数据</label>
                 <div class="input-group">
-                    <input type="number" id="drug-count" value="5" min="1" max="100">
                     <button onclick="generateDrugs()" class="btn btn-primary">生成药品</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>生成客户数据</label>
                 <div class="input-group">
-                    <input type="number" id="customer-count" value="5" min="1" max="100">
                     <button onclick="generateCustomers()" class="btn btn-primary">生成客户</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>生成员工数据</label>
                 <div class="input-group">
-                    <input type="number" id="employee-count" value="5" min="1" max="100">
                     <button onclick="generateEmployees()" class="btn btn-primary">生成员工</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>生成供应商数据</label>
                 <div class="input-group">
-                    <input type="number" id="supplier-count" value="3" min="1" max="50">
                     <button onclick="generateSuppliers()" class="btn btn-primary">生成供应商</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>生成仓库数据</label>
                 <div class="input-group">
-                    <input type="number" id="warehouse-count" value="3" min="1" max="20">
                     <button onclick="generateWarehouses()" class="btn btn-primary">生成仓库</button>
                 </div>
             </div>
@@ -90,39 +105,30 @@
             <div class="action-group">
                 <label>批量入库测试</label>
                 <div class="input-group">
-                    <input type="number" id="stockin-count" value="10" min="1" max="1000">
                     <button onclick="batchStockIn()" class="btn btn-warning">批量入库</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>批量销售测试</label>
                 <div class="input-group">
-                    <input type="number" id="sales-count" value="10" min="1" max="1000">
                     <button onclick="batchSales()" class="btn btn-warning">批量销售</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>批量退货测试</label>
                 <div class="input-group">
-                    <input type="number" id="return-count" value="5" min="1" max="100">
                     <button onclick="batchReturnStock()" class="btn btn-warning">批量退货</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>批量销售退货</label>
                 <div class="input-group">
-                    <input type="number" id="sales-return-count" value="5" min="1" max="100">
                     <button onclick="batchSalesReturn()" class="btn btn-warning">销售退货</button>
                 </div>
             </div>
-            
             <div class="action-group">
                 <label>库存盘点测试</label>
                 <div class="input-group">
-                    <input type="number" id="check-count" value="5" min="1" max="100">
                     <button onclick="batchInventoryCheck()" class="btn btn-warning">库存盘点</button>
                 </div>
             </div>
@@ -335,8 +341,8 @@ document.addEventListener('DOMContentLoaded', function() {
     addLog('系统就绪，等待测试命令...', 'info');
 });
 
-// 添加日志
 function addLog(message, type = 'info') {
+    if (!logContainer) return;
     const timestamp = new Date().toLocaleTimeString();
     const entry = document.createElement('div');
     entry.className = `log-entry log-${type}`;
@@ -345,16 +351,132 @@ function addLog(message, type = 'info') {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
-// 清空日志
-function clearLog() {
-    logContainer.innerHTML = '';
-    addLog('日志已清空', 'info');
+// 添加日志
+// 生成药品数据
+function generateDrugs() {
+    addLog('开始生成药品数据...', 'info');
+    fetch('/api/test/generate_drug', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 生成药品失败: ' + error, 'error');
+    });
+}
+// 生成客户数据
+function generateCustomers() {
+    addLog('开始生成客户数据...', 'info');
+    fetch('/api/test/generate_customer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 生成客户失败: ' + error, 'error');
+    });
+}
+// 生成员工数据
+function generateEmployees() {
+    addLog('开始生成员工数据...', 'info');
+    fetch('/api/test/generate_employee', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 生成员工失败: ' + error, 'error');
+    });
+}
+// 生成供应商数据
+function generateSuppliers() {
+    addLog('开始生成供应商数据...', 'info');
+    fetch('/api/test/generate_supplier', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 生成供应商失败: ' + error, 'error');
+    });
+}
+// 生成仓库数据
+function generateWarehouses() {
+    addLog('开始生成仓库数据...', 'info');
+    fetch('/api/test/generate_warehouse', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else if (result.message && result.message.indexOf('员工') !== -1) {
+            if (confirm(result.message + '\n是否自动生成员工？')) {
+                generateEmployees();
+                setTimeout(generateWarehouses, 1000);
+            } else {
+                addLog('未生成员工，无法生成仓库。', 'warning');
+            }
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 生成仓库失败: ' + error, 'error');
+    });
 }
 
 // 加载统计信息
 function loadStats() {
-    addLog('正在加载系统统计...', 'info');
-    
     fetch('/api/test/stats')
         .then(response => response.json())
         .then(result => {
@@ -362,9 +484,15 @@ function loadStats() {
                 document.getElementById('stat-drugs').textContent = result.data.drugs;
                 document.getElementById('stat-customers').textContent = result.data.customers;
                 document.getElementById('stat-suppliers').textContent = result.data.suppliers;
+                document.getElementById('stat-employees').textContent = result.data.employees;
+                document.getElementById('stat-warehouses').textContent = result.data.warehouses;
                 document.getElementById('stat-inventory').textContent = result.data.total_inventory;
                 document.getElementById('stat-stockins').textContent = result.data.stock_ins;
                 document.getElementById('stat-sales').textContent = result.data.sales;
+                document.getElementById('stat-returns').textContent = result.data.returns;
+                document.getElementById('stat-salesreturns').textContent = result.data.sales_returns;
+                document.getElementById('stat-invchecks').textContent = result.data.inventory_checks;
+                document.getElementById('stat-financestats').textContent = result.data.finance_stats;
                 addLog('✓ 统计信息加载成功', 'success');
             }
         })
@@ -373,100 +501,52 @@ function loadStats() {
         });
 }
 
-// 生成药品数据
-function generateDrugs() {
-    const count = document.getElementById('drug-count').value;
-    addLog(`开始生成 ${count} 条药品数据...`, 'info');
-    
-    fetch('/api/test/generate_drug', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 生成药品失败: ' + error, 'error');
-        });
-}
-
-// 生成客户数据
-function generateCustomers() {
-    const count = document.getElementById('customer-count').value;
-    addLog(`开始生成 ${count} 条客户数据...`, 'info');
-    
-    fetch('/api/test/generate_customer', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 生成客户失败: ' + error, 'error');
-        });
-}
-
 // 批量入库
 function batchStockIn() {
-    const count = document.getElementById('stockin-count').value;
-    addLog(`开始批量入库测试 (${count} 条)...`, 'warning');
-    
+    addLog('开始批量入库测试...', 'warning');
     fetch('/api/test/batch_stock_in', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
+        body: JSON.stringify({})
     })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 批量入库失败: ' + error, 'error');
-        });
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 批量入库失败: ' + error, 'error');
+    });
 }
 
 // 批量销售
 function batchSales() {
-    const count = document.getElementById('sales-count').value;
-    addLog(`开始批量销售测试 (${count} 条)...`, 'warning');
-    
+    addLog('开始批量销售测试...', 'warning');
     fetch('/api/test/batch_sales', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
+        body: JSON.stringify({})
     })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 批量销售失败: ' + error, 'error');
-        });
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 批量销售失败: ' + error, 'error');
+    });
 }
 
 // 全链路测试
@@ -577,74 +657,74 @@ function generateWarehouses() {
 
 // 批量退货
 function batchReturnStock() {
-    const count = document.getElementById('return-count').value;
-    addLog(`开始批量退货测试 (${count} 条)...`, 'warning');
-    
+    addLog('开始批量退货测试...', 'warning');
     fetch('/api/test/batch_return_stock', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
+        body: JSON.stringify({})
     })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 批量退货失败: ' + error, 'error');
-        });
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 批量退货失败: ' + error, 'error');
+    });
 }
 
 // 批量销售退货
 function batchSalesReturn() {
-    const count = document.getElementById('sales-return-count').value;
-    addLog(`开始批量销售退货测试 (${count} 条)...`, 'warning');
-    
+    addLog('开始批量销售退货测试...', 'warning');
     fetch('/api/test/batch_sales_return', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
+        body: JSON.stringify({})
     })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 批量销售退货失败: ' + error, 'error');
-        });
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 批量销售退货失败: ' + error, 'error');
+    });
 }
 
 // 库存盘点
 function batchInventoryCheck() {
-    const count = document.getElementById('check-count').value;
-    addLog(`开始库存盘点测试 (${count} 条)...`, 'warning');
-    
+    addLog('开始库存盘点测试...', 'warning');
     fetch('/api/test/batch_inventory_check', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
+        body: JSON.stringify({})
     })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 库存盘点失败: ' + error, 'error');
-        });
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            addLog(`✓ ${result.message}`, 'success');
+            alert(result.message);
+            loadStats();
+        } else {
+            addLog(`✗ ${result.message}`, 'error');
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        addLog('✗ 库存盘点失败: ' + error, 'error');
+    });
 }
 
 // 全链路测试

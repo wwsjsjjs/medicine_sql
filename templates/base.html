@@ -94,7 +94,15 @@
                     <h1>{% block page_title %}{% endblock %}</h1>
                 </div>
                 <div class="header-right">
-                    <span class="user-info">👤 管理员</span>
+                    <span class="user-info">
+                        👤
+                        {% if current_employee %}
+                            {{ current_employee.name }}
+                        {% else %}
+                            未登录
+                        {% endif %}
+                        <a href="{{ url_for('auth.login', next=request.path) }}" style="margin-left:10px; color:#007bff; text-decoration:underline;">切换</a>
+                    </span>
                     <span class="datetime" id="datetime"></span>
                 </div>
             </header>

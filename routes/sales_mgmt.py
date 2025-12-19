@@ -165,18 +165,29 @@ def finance_generate():
     total_cost = total_sales * Decimal('0.6')  # 假设成本率60%
     total_profit = total_sales - total_cost
     
-    finance_stat = FinanceStat(
-        stat_type=stat_type,
-        stat_date=stat_date,
-        total_sales=total_sales,
-        total_cost=total_cost,
-        total_profit=total_profit,
-        employee_id=request.form.get('employee_id', 1)
-    )
-    db.session.add(finance_stat)
-    db.session.commit()
+    # 检查是否已存在相同的统计记录
+    finance_stat = FinanceStat.query.filter_by(stat_type=stat_type, stat_date=stat_date).first()
+    if finance_stat:
+        # 已存在则更新
+        finance_stat.total_sales = total_sales
+        finance_stat.total_cost = total_cost
+        finance_stat.total_profit = total_profit
+        finance_stat.employee_id = request.form.get('employee_id', 1)
+        flash('财务统计更新成功！', 'success')
+    else:
+        # 不存在则插入
+        finance_stat = FinanceStat(
+            stat_type=stat_type,
+            stat_date=stat_date,
+            total_sales=total_sales,
+            total_cost=total_cost,
+            total_profit=total_profit,
+            employee_id=request.form.get('employee_id', 1)
+        )
+        db.session.add(finance_stat)
+        flash('财务统计生成成功！', 'success')
     
-    flash('财务统计生成成功！', 'success')
+    db.session.commit()
     return redirect(url_for('sales.finance_list'))
 
 # ==================== 销售报表 ====================

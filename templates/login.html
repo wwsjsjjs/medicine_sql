@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}模拟登录{% endblock %}
+{% block page_title %}模拟登录{% endblock %}
+{% block content %}
+<div class="login-box">
+    <form method="post">
+        <label for="employee_id">选择员工：</label>
+        <select name="employee_id" id="employee_id">
+            {% for emp in employees %}
+            <option value="{{ emp.employee_id }}" {% if emp.employee_id == current_id %}selected{% endif %}>{{ emp.name }} (ID:{{ emp.employee_id }})</option>
+            {% endfor %}
+        </select>
+        <button type="submit">登录/切换</button>
+    </form>
+</div>
+<style>
+.login-box { margin: 60px auto; max-width: 400px; background: #fff; border-radius: 8px; padding: 32px; box-shadow: 0 2px 12px #0001; }
+.login-box label { font-size: 1.1em; }
+.login-box select { width: 100%; margin: 12px 0 24px 0; padding: 8px; }
+.login-box button { width: 100%; padding: 10px; font-size: 1.1em; background: #007bff; color: #fff; border: none; border-radius: 4px; }
+</style>
+{% endblock %}

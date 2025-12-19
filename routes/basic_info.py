@@ -2,8 +2,8 @@
 基础信息管理模块路由
 包括：药品、员工、客户、供应商管理
 """
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo, log_system_action
 from datetime import datetime
 
 basic_bp = Blueprint('basic', __name__, url_prefix='/basic')
@@ -33,6 +33,10 @@ def drug_add():
         )
         db.session.add(drug)
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'insert', 'drug_info', {
+            'drug_id': drug.drug_id,
+            'name': drug.name
+        })
         flash('药品添加成功！', 'success')
         return redirect(url_for('basic.drug_list'))
     return render_template('basic/drug_form.html', drug=None)
@@ -54,6 +58,10 @@ def drug_edit(drug_id):
         drug.status = request.form.get('status')
         drug.update_time = datetime.now()
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'update', 'drug_info', {
+            'drug_id': drug.drug_id,
+            'name': drug.name
+        })
         flash('药品更新成功！', 'success')
         return redirect(url_for('basic.drug_list'))
     return render_template('basic/drug_form.html', drug=drug)
@@ -64,6 +72,10 @@ def drug_delete(drug_id):
     drug = DrugInfo.query.get_or_404(drug_id)
     db.session.delete(drug)
     db.session.commit()
+    log_system_action(session.get('employee_id'), 'delete', 'drug_info', {
+        'drug_id': drug.drug_id,
+        'name': drug.name
+    })
     flash('药品删除成功！', 'success')
     return redirect(url_for('basic.drug_list'))
 
@@ -90,6 +102,10 @@ def employee_add():
         )
         db.session.add(employee)
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'insert', 'employee_info', {
+            'employee_id': employee.employee_id,
+            'name': employee.name
+        })
         flash('员工添加成功！', 'success')
         return redirect(url_for('basic.employee_list'))
     return render_template('basic/employee_form.html', employee=None)
@@ -110,6 +126,10 @@ def employee_edit(employee_id):
         employee.status = request.form.get('status')
         employee.update_time = datetime.now()
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'update', 'employee_info', {
+            'employee_id': employee.employee_id,
+            'name': employee.name
+        })
         flash('员工更新成功！', 'success')
         return redirect(url_for('basic.employee_list'))
     return render_template('basic/employee_form.html', employee=employee)
@@ -120,6 +140,10 @@ def employee_delete(employee_id):
     employee = EmployeeInfo.query.get_or_404(employee_id)
     db.session.delete(employee)
     db.session.commit()
+    log_system_action(session.get('employee_id'), 'delete', 'employee_info', {
+        'employee_id': employee.employee_id,
+        'name': employee.name
+    })
     flash('员工删除成功！', 'success')
     return redirect(url_for('basic.employee_list'))
 
@@ -143,6 +167,10 @@ def customer_add():
         )
         db.session.add(customer)
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'insert', 'customer_info', {
+            'customer_id': customer.customer_id,
+            'name': customer.name
+        })
         flash('客户添加成功！', 'success')
         return redirect(url_for('basic.customer_list'))
     return render_template('basic/customer_form.html', customer=None)
@@ -159,6 +187,10 @@ def customer_edit(customer_id):
         customer.address = request.form.get('address')
         customer.update_time = datetime.now()
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'update', 'customer_info', {
+            'customer_id': customer.customer_id,
+            'name': customer.name
+        })
         flash('客户更新成功！', 'success')
         return redirect(url_for('basic.customer_list'))
     return render_template('basic/customer_form.html', customer=customer)
@@ -169,6 +201,10 @@ def customer_delete(customer_id):
     customer = CustomerInfo.query.get_or_404(customer_id)
     db.session.delete(customer)
     db.session.commit()
+    log_system_action(session.get('employee_id'), 'delete', 'customer_info', {
+        'customer_id': customer.customer_id,
+        'name': customer.name
+    })
     flash('客户删除成功！', 'success')
     return redirect(url_for('basic.customer_list'))
 
@@ -192,6 +228,10 @@ def supplier_add():
         )
         db.session.add(supplier)
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'insert', 'supplier_info', {
+            'supplier_id': supplier.supplier_id,
+            'name': supplier.name
+        })
         flash('供应商添加成功！', 'success')
         return redirect(url_for('basic.supplier_list'))
     return render_template('basic/supplier_form.html', supplier=None)
@@ -208,6 +248,10 @@ def supplier_edit(supplier_id):
         supplier.qualification_no = request.form.get('qualification_no')
         supplier.update_time = datetime.now()
         db.session.commit()
+        log_system_action(session.get('employee_id'), 'update', 'supplier_info', {
+            'supplier_id': supplier.supplier_id,
+            'name': supplier.name
+        })
         flash('供应商更新成功！', 'success')
         return redirect(url_for('basic.supplier_list'))
     return render_template('basic/supplier_form.html', supplier=supplier)
@@ -218,5 +262,9 @@ def supplier_delete(supplier_id):
     supplier = SupplierInfo.query.get_or_404(supplier_id)
     db.session.delete(supplier)
     db.session.commit()
+    log_system_action(session.get('employee_id'), 'delete', 'supplier_info', {
+        'supplier_id': supplier.supplier_id,
+        'name': supplier.name
+    })
     flash('供应商删除成功！', 'success')
     return redirect(url_for('basic.supplier_list'))

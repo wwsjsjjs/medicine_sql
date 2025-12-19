@@ -1,3 +1,14 @@
+import json
+def log_system_action(employee_id, action_type, table_name, action_content):
+    """写入系统日志（employee_id可为None，action_content建议为json字符串）"""
+    log = SystemLog(
+        employee_id=employee_id,
+        action_type=action_type,
+        table_name=table_name,
+        action_content=json.dumps(action_content, ensure_ascii=False) if not isinstance(action_content, str) else action_content
+    )
+    db.session.add(log)
+    db.session.commit()
 def init_basic_tables():
     """初始化基础表数据（角色、权限、角色权限、用户角色、系统管理员）"""
     from sqlalchemy.exc import IntegrityError
@@ -14,6 +25,8 @@ def init_basic_tables():
     for perm in default_permissions:
         if not Permission.query.filter_by(name=perm['name']).first():
             db.session.add(Permission(**perm))
+            db.session.flush()
+            log_system_action(None, 'insert', 'permission', perm)
     db.session.commit()
 
     # 2. 初始化角色
@@ -24,6 +37,8 @@ def init_basic_tables():
     for role in default_roles:
         if not Role.query.filter_by(name=role['name']).first():
             db.session.add(Role(**role))
+            db.session.flush()
+            log_system_action(None, 'insert', 'role', role)
     db.session.commit()
 
     # 3. 角色权限分配（系统管理员拥有全部权限，普通员工部分权限）
@@ -33,11 +48,15 @@ def init_basic_tables():
     for perm in all_permissions:
         if not RolePermission.query.filter_by(role_id=admin_role.role_id, permission_id=perm.permission_id).first():
             db.session.add(RolePermission(role_id=admin_role.role_id, permission_id=perm.permission_id))
+            db.session.flush()
+            log_system_action(None, 'insert', 'role_permission', {'role_id': admin_role.role_id, 'permission_id': perm.permission_id})
     # 普通员工只分配部分权限
     for perm in all_permissions:
         if perm.name in ['药品管理', '库存管理', '销售管理', '客户管理', '供应商管理']:
             if not RolePermission.query.filter_by(role_id=employee_role.role_id, permission_id=perm.permission_id).first():
                 db.session.add(RolePermission(role_id=employee_role.role_id, permission_id=perm.permission_id))
+                db.session.flush()
+                log_system_action(None, 'insert', 'role_permission', {'role_id': employee_role.role_id, 'permission_id': perm.permission_id})
     db.session.commit()
 
     # 4. 初始化系统管理员账号
@@ -54,11 +73,20 @@ def init_basic_tables():
         )
         db.session.add(admin)
         db.session.commit()
+        log_system_action(None, 'insert', 'employee_info', {
+            'name': '系统管理员',
+            'account': 'admin',
+            'phone': '13000000000',
+            'department': '管理',
+            'position': '系统管理员',
+            'status': '在职'
+        })
 
     # 5. 管理员分配角色
     if not UserRole.query.filter_by(employee_id=admin.employee_id, role_id=admin_role.role_id).first():
         db.session.add(UserRole(employee_id=admin.employee_id, role_id=admin_role.role_id))
         db.session.commit()
+        log_system_action(admin.employee_id, 'insert', 'user_role', {'employee_id': admin.employee_id, 'role_id': admin_role.role_id})
 
     # 6. 系统日志表可不插入默认数据
 
