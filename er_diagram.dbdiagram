@@ -1,0 +1,589 @@
+{
+  "version": "1.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "detailLevel": "All",
+  "tablePositions": [
+    {
+      "name": "drug_info",
+      "schemaName": "public",
+      "x": 1314.170553355004,
+      "y": 461.6335564112079
+    },
+    {
+      "name": "employee_info",
+      "schemaName": "public",
+      "x": 1314.901605300262,
+      "y": 1265.067259742215
+    },
+    {
+      "name": "customer_info",
+      "schemaName": "public",
+      "x": 469.8626214438842,
+      "y": 915.7071100488929
+    },
+    {
+      "name": "supplier_info",
+      "schemaName": "public",
+      "x": 1324.422018198754,
+      "y": 50.91469027747063
+    },
+    {
+      "name": "permission",
+      "schemaName": "public",
+      "x": 1561.705903340204,
+      "y": 1738.2212034778572
+    },
+    {
+      "name": "role",
+      "schemaName": "public",
+      "x": 1575.7350353749084,
+      "y": 1494.8928773019757
+    },
+    {
+      "name": "role_permission",
+      "schemaName": "public",
+      "x": 1854.9161539660313,
+      "y": 1674.0889853006802
+    },
+    {
+      "name": "user_role",
+      "schemaName": "public",
+      "x": 1852.3359678204486,
+      "y": 1430.0854391620735
+    },
+    {
+      "name": "system_log",
+      "schemaName": "public",
+      "x": 2189.4675358172526,
+      "y": 1232.695052870979
+    },
+    {
+      "name": "stock_in",
+      "schemaName": "public",
+      "x": 783.0324792009727,
+      "y": 116.85475222738509
+    },
+    {
+      "name": "inventory",
+      "schemaName": "public",
+      "x": 1632.5730238883768,
+      "y": 800.957739328175
+    },
+    {
+      "name": "warehouse",
+      "schemaName": "public",
+      "x": 1317.266107253387,
+      "y": 953.1824843704858
+    },
+    {
+      "name": "inventory_check",
+      "schemaName": "public",
+      "x": 783.0324792009727,
+      "y": 513.0415433562785
+    },
+    {
+      "name": "return_stock",
+      "schemaName": "public",
+      "x": 783.0324792009727,
+      "y": 1216.7960122395073
+    },
+    {
+      "name": "sales",
+      "schemaName": "public",
+      "x": 783.0324792009727,
+      "y": 851.6751913859084
+    },
+    {
+      "name": "sales_return",
+      "schemaName": "public",
+      "x": 452.99874951517296,
+      "y": 1285.9591211577986
+    },
+    {
+      "name": "finance_stat",
+      "schemaName": "public",
+      "x": 1896.5907974134082,
+      "y": 893.7731417719287
+    }
+  ],
+  "tableGroupCollapseStates": [],
+  "stickyNoteLayouts": [],
+  "referencePaths": [
+    {
+      "firstFieldNames": [
+        "role_id"
+      ],
+      "firstTableName": "role",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "role_id"
+      ],
+      "secondTableName": "role_permission",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "permission_id"
+      ],
+      "firstTableName": "permission",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "permission_id"
+      ],
+      "secondTableName": "role_permission",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "user_role",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1552.975335769012,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1809.6188844266153,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1809.6188844266153,
+          "y": 1510.0854391620735
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "role_id"
+      ],
+      "firstTableName": "role",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "role_id"
+      ],
+      "secondTableName": "user_role",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "system_log",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "supplier_id"
+      ],
+      "firstTableName": "supplier_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "supplier_id"
+      ],
+      "secondTableName": "stock_in",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1281.1528374106779,
+          "y": 89.12049355344038
+        },
+        {
+          "x": 1281.1528374106779,
+          "y": 196.8547522273851
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "drug_id"
+      ],
+      "firstTableName": "drug_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "drug_id"
+      ],
+      "secondTableName": "stock_in",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1295.7997437478057,
+          "y": 508.0011902905362
+        },
+        {
+          "x": 1295.7997437478057,
+          "y": 228.8547522273851
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "stock_in",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1260.4213526501364,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1260.4213526501364,
+          "y": 388.8547522273851
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "drug_id"
+      ],
+      "firstTableName": "drug_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "drug_id"
+      ],
+      "secondTableName": "inventory",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "warehouse_id"
+      ],
+      "firstTableName": "warehouse",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "warehouse_id"
+      ],
+      "secondTableName": "inventory",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "manager_id"
+      ],
+      "secondTableName": "warehouse",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "drug_id"
+      ],
+      "firstTableName": "drug_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "drug_id"
+      ],
+      "secondTableName": "inventory_check",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1220.8708659108436,
+          "y": 508.0011902905362
+        },
+        {
+          "x": 1220.8708659108436,
+          "y": 593.0415433562782
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "warehouse_id"
+      ],
+      "firstTableName": "warehouse",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "warehouse_id"
+      ],
+      "secondTableName": "inventory_check",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1226.3852411317844,
+          "y": 997.9177521291424
+        },
+        {
+          "x": 1226.3852411317844,
+          "y": 625.0415433562782
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "inventory_check",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1209.2648275278877,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1209.2648275278877,
+          "y": 785.0415433562782
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "supplier_id"
+      ],
+      "firstTableName": "supplier_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "supplier_id"
+      ],
+      "secondTableName": "return_stock",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1055.9955438209206,
+          "y": 89.12049355344038
+        },
+        {
+          "x": 1055.9955438209206,
+          "y": 1296.7960122395073
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "drug_id"
+      ],
+      "firstTableName": "drug_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "drug_id"
+      ],
+      "secondTableName": "return_stock",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1081.8705249987922,
+          "y": 508.0011902905362
+        },
+        {
+          "x": 1081.8705249987922,
+          "y": 1328.7960122395073
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "return_stock",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1105.2649141712936,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1105.2649141712936,
+          "y": 1450.233432072859
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "drug_id"
+      ],
+      "firstTableName": "drug_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "drug_id"
+      ],
+      "secondTableName": "sales",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1159.3722475592679,
+          "y": 508.0011902905362
+        },
+        {
+          "x": 1159.3722475592679,
+          "y": 931.6751913859084
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "customer_id"
+      ],
+      "firstTableName": "customer_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "customer_id"
+      ],
+      "secondTableName": "sales",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "sales",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1145.446247814832,
+          "y": 1313.7237591777757
+        },
+        {
+          "x": 1145.446247814832,
+          "y": 1123.6751913859084
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "sales_id"
+      ],
+      "firstTableName": "sales",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "sales_id"
+      ],
+      "secondTableName": "sales_return",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "sales_return",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1294.901605300262,
+          "y": 1676.4717859937118
+        },
+        {
+          "x": 689.0241401401729,
+          "y": 1676.4717859937118
+        }
+      ]
+    },
+    {
+      "firstFieldNames": [
+        "employee_id"
+      ],
+      "firstTableName": "employee_info",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "employee_id"
+      ],
+      "secondTableName": "finance_stat",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": [
+        {
+          "x": 1789.307675560106,
+          "y": 1313.067259742215
+        },
+        {
+          "x": 1789.307675560106,
+          "y": 1133.7731417719287
+        }
+      ]
+    }
+  ]
+}

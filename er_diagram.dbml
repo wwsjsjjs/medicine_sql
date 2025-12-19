@@ -1,172 +1,172 @@
-Table drug_info {
-  drug_id int [pk]
-  name varchar
-  spec varchar
-  manufacturer varchar
-  approval_number varchar
-  category varchar
-  unit varchar
-  purchase_price decimal
-  sale_price decimal
-  expiry_date date
-  status varchar
-  create_time datetime
-  update_time datetime
+Table drug_info [note: '药品信息表'] {
+  drug_id int [pk, note: '药品ID']
+  name varchar [note: '药品名称']
+  spec varchar [note: '规格']
+  manufacturer varchar [note: '生产厂家']
+  approval_number varchar [note: '批准文号']
+  category varchar [note: '类别(处方/非处方)']
+  unit varchar [note: '单位']
+  purchase_price decimal [note: '进价']
+  sale_price decimal [note: '售价']
+  expiry_date date [note: '有效期']
+  status varchar [note: '状态(在售/下架)']
+  create_time datetime [note: '创建时间']
+  update_time datetime [note: '更新时间']
 }
 
-Table employee_info {
-  employee_id int [pk]
-  name varchar
-  department varchar
-  position varchar
-  phone varchar
-  hire_date date
-  account varchar
-  password varchar
-  status varchar
-  create_time datetime
-  update_time datetime
+Table employee_info [note: '员工信息表'] {
+  employee_id int [pk, note: '员工ID']
+  name varchar [note: '姓名']
+  department varchar [note: '部门']
+  position varchar [note: '职位']
+  phone varchar [note: '电话']
+  hire_date date [note: '入职日期']
+  account varchar [note: '账号']
+  password varchar [note: '密码(加密)']
+  status varchar [note: '状态(在职/离职)']
+  create_time datetime [note: '创建时间']
+  update_time datetime [note: '更新时间']
 }
 
-Table customer_info {
-  customer_id int [pk]
-  name varchar
-  type varchar
-  contact varchar
-  phone varchar
-  address varchar
-  create_time datetime
-  update_time datetime
+Table customer_info [note: '客户信息表'] {
+  customer_id int [pk, note: '客户ID']
+  name varchar [note: '客户名称']
+  type varchar [note: '类型(零售/批发)']
+  contact varchar [note: '联系人']
+  phone varchar [note: '联系电话']
+  address varchar [note: '地址']
+  create_time datetime [note: '创建时间']
+  update_time datetime [note: '更新时间']
 }
 
-Table supplier_info {
-  supplier_id int [pk]
-  name varchar
-  contact varchar
-  phone varchar
-  address varchar
-  qualification_no varchar
-  create_time datetime
-  update_time datetime
+Table supplier_info [note: '供应商信息表'] {
+  supplier_id int [pk, note: '供应商ID']
+  name varchar [note: '供应商名称']
+  contact varchar [note: '联系人']
+  phone varchar [note: '联系电话']
+  address varchar [note: '地址']
+  qualification_no varchar [note: '资质编号']
+  create_time datetime [note: '创建时间']
+  update_time datetime [note: '更新时间']
 }
 
-Table permission {
-  permission_id int [pk]
-  name varchar
-  description varchar
+Table permission [note: '权限表'] {
+  permission_id int [pk, note: '权限ID']
+  name varchar [note: '权限名称']
+  description varchar [note: '描述']
 }
 
-Table role {
-  role_id int [pk]
-  name varchar
-  description varchar
+Table role [note: '角色表'] {
+  role_id int [pk, note: '角色ID']
+  name varchar [note: '角色名称']
+  description varchar [note: '描述']
 }
 
-Table role_permission {
-  id int [pk]
-  role_id int [ref: > role.role_id]
-  permission_id int [ref: > permission.permission_id]
+Table role_permission [note: '角色权限关联表'] {
+  id int [pk, note: '主键']
+  role_id int [ref: > role.role_id, note: '角色ID']
+  permission_id int [ref: > permission.permission_id, note: '权限ID']
 }
 
-Table user_role {
-  id int [pk]
-  employee_id int [ref: > employee_info.employee_id]
-  role_id int [ref: > role.role_id]
+Table user_role [note: '用户角色关联表'] {
+  id int [pk, note: '主键']
+  employee_id int [ref: > employee_info.employee_id, note: '员工ID']
+  role_id int [ref: > role.role_id, note: '角色ID']
 }
 
-Table system_log {
-  log_id int [pk]
-  employee_id int [ref: > employee_info.employee_id]
-  action_type varchar
-  table_name varchar
-  action_time datetime
-  action_content text
+Table system_log [note: '系统日志表'] {
+  log_id int [pk, note: '日志ID']
+  employee_id int [ref: > employee_info.employee_id, note: '员工ID']
+  action_type varchar [note: '操作类型']
+  table_name varchar [note: '表名']
+  action_time datetime [note: '操作时间']
+  action_content text [note: '操作内容']
 }
 
-Table stock_in {
-  stock_in_id int [pk]
-  drug_id int [ref: > drug_info.drug_id]
-  supplier_id int [ref: > supplier_info.supplier_id]
-  quantity int
-  unit_price decimal
-  total_price decimal
-  stock_in_date date
-  employee_id int [ref: > employee_info.employee_id]
-  remark varchar
-  create_time datetime
+Table stock_in [note: '入库登记表'] {
+  stock_in_id int [pk, note: '入库ID']
+  supplier_id int [ref: > supplier_info.supplier_id, note: '供应商ID']
+  drug_id int [ref: > drug_info.drug_id, note: '药品ID']
+  quantity int [note: '数量']
+  unit_price decimal [note: '单价']
+  total_price decimal [note: '总价']
+  stock_in_date date [note: '入库日期']
+  employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
+  remark varchar [note: '备注']
+  create_time datetime [note: '创建时间']
 }
 
-Table inventory {
-  inventory_id int [pk]
-  drug_id int [ref: > drug_info.drug_id]
-  warehouse_id int [ref: > warehouse.warehouse_id]
-  quantity int
-  location varchar
-  last_check_date date
-  create_time datetime
-  update_time datetime
+Table inventory [note: '库存表'] {
+  inventory_id int [pk, note: '库存ID']
+  drug_id int [ref: > drug_info.drug_id, note: '药品ID']
+  warehouse_id int [ref: > warehouse.warehouse_id, note: '仓库ID']
+  quantity int [note: '数量']
+  location varchar [note: '库位']
+  last_check_date date [note: '上次盘点日期']
+  create_time datetime [note: '创建时间']
+  update_time datetime [note: '更新时间']
 }
 
-Table warehouse {
-  warehouse_id int [pk]
-  name varchar
-  address varchar
-  manager_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table warehouse [note: '仓库表'] {
+  warehouse_id int [pk, note: '仓库ID']
+  name varchar [note: '仓库名称']
+  address varchar [note: '地址']
+  manager_id int [ref: > employee_info.employee_id, note: '负责人ID']
+  create_time datetime [note: '创建时间']
 }
 
-Table inventory_check {
-  check_id int [pk]
-  drug_id int [ref: > drug_info.drug_id]
-  warehouse_id int [ref: > warehouse.warehouse_id]
-  checked_quantity int
-  actual_quantity int
-  diff_reason varchar
-  check_date date
-  employee_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table inventory_check [note: '库存盘点表'] {
+  check_id int [pk, note: '盘点ID']
+  drug_id int [ref: > drug_info.drug_id, note: '药品ID']
+  warehouse_id int [ref: > warehouse.warehouse_id, note: '仓库ID']
+  checked_quantity int [note: '账面数量']
+  actual_quantity int [note: '实际数量']
+  diff_reason varchar [note: '差异原因']
+  check_date date [note: '盘点日期']
+  employee_id int [ref: > employee_info.employee_id, note: '盘点人ID']
+  create_time datetime [note: '创建时间']
 }
 
-Table return_stock {
-  return_id int [pk]
-  drug_id int [ref: > drug_info.drug_id]
-  supplier_id int [ref: > supplier_info.supplier_id]
-  quantity int
-  reason varchar
-  return_date date
-  employee_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table return_stock [note: '退货处理表'] {
+  return_id int [pk, note: '退货ID']
+  supplier_id int [ref: > supplier_info.supplier_id, note: '供应商ID']
+  drug_id int [ref: > drug_info.drug_id, note: '药品ID']
+  quantity int [note: '数量']
+  reason varchar [note: '退货原因']
+  return_date date [note: '退货日期']
+  employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
+  create_time datetime [note: '创建时间']
 }
 
-Table sales {
-  sales_id int [pk]
-  drug_id int [ref: > drug_info.drug_id]
-  customer_id int [ref: > customer_info.customer_id]
-  quantity int
-  unit_price decimal
-  total_price decimal
-  sales_date date
-  employee_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table sales [note: '销售登记表'] {
+  sales_id int [pk, note: '销售ID']
+  drug_id int [ref: > drug_info.drug_id, note: '药品ID']
+  customer_id int [ref: > customer_info.customer_id, note: '客户ID']
+  quantity int [note: '数量']
+  unit_price decimal [note: '单价']
+  total_price decimal [note: '总价']
+  sales_date date [note: '销售日期']
+  employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
+  create_time datetime [note: '创建时间']
 }
 
-Table sales_return {
-  sales_return_id int [pk]
-  sales_id int [ref: > sales.sales_id]
-  quantity int
-  reason varchar
-  return_date date
-  employee_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table sales_return [note: '销售退货表'] {
+  sales_return_id int [pk, note: '销售退货ID']
+  sales_id int [ref: > sales.sales_id, note: '销售ID']
+  quantity int [note: '退货数量']
+  reason varchar [note: '退货原因']
+  return_date date [note: '退货日期']
+  employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
+  create_time datetime [note: '创建时间']
 }
 
-Table finance_stat {
-  stat_id int [pk]
-  stat_type varchar
-  stat_date date
-  total_sales decimal
-  total_cost decimal
-  total_profit decimal
-  employee_id int [ref: > employee_info.employee_id]
-  create_time datetime
+Table finance_stat [note: '财务统计表'] {
+  stat_id int [pk, note: '统计ID']
+  stat_type varchar [note: '统计类型(日/月)']
+  stat_date date [note: '统计日期']
+  total_sales decimal [note: '总销售额']
+  total_cost decimal [note: '总成本']
+  total_profit decimal [note: '总利润']
+  employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
+  create_time datetime [note: '创建时间']
 }
