@@ -584,76 +584,76 @@ function fullChainTest() {
 }
 
 // 生成员工数据
-function generateEmployees() {
-    const count = document.getElementById('employee-count').value;
-    addLog(`开始生成 ${count} 条员工数据...`, 'info');
+// function generateEmployees() {
+//     const count = document.getElementById('employee-count').value;
+//     addLog(`开始生成 ${count} 条员工数据...`, 'info');
     
-    fetch('/api/test/generate_employee', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 生成员工失败: ' + error, 'error');
-        });
-}
+//     fetch('/api/test/generate_employee', {
+//         method: 'POST',
+//         headers: {'Content-Type': 'application/json'},
+//         body: JSON.stringify({count: parseInt(count)})
+//     })
+//         .then(response => response.json())
+//         .then(result => {
+//             if (result.success) {
+//                 addLog(`✓ ${result.message}`, 'success');
+//                 loadStats();
+//             } else {
+//                 addLog(`✗ ${result.message}`, 'error');
+//             }
+//         })
+//         .catch(error => {
+//             addLog('✗ 生成员工失败: ' + error, 'error');
+//         });
+// }
 
 // 生成供应商数据
-function generateSuppliers() {
-    const count = document.getElementById('supplier-count').value;
-    addLog(`开始生成 ${count} 条供应商数据...`, 'info');
+// function generateSuppliers() {
+//     const count = document.getElementById('supplier-count').value;
+//     addLog(`开始生成 ${count} 条供应商数据...`, 'info');
     
-    fetch('/api/test/generate_supplier', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 生成供应商失败: ' + error, 'error');
-        });
-}
+//     fetch('/api/test/generate_supplier', {
+//         method: 'POST',
+//         headers: {'Content-Type': 'application/json'},
+//         body: JSON.stringify({count: parseInt(count)})
+//     })
+//         .then(response => response.json())
+//         .then(result => {
+//             if (result.success) {
+//                 addLog(`✓ ${result.message}`, 'success');
+//                 loadStats();
+//             } else {
+//                 addLog(`✗ ${result.message}`, 'error');
+//             }
+//         })
+//         .catch(error => {
+//             addLog('✗ 生成供应商失败: ' + error, 'error');
+//         });
+// }
 
 // 生成仓库数据
-function generateWarehouses() {
-    const count = document.getElementById('warehouse-count').value;
-    addLog(`开始生成 ${count} 条仓库数据...`, 'info');
+// function generateWarehouses() {
+//     const count = document.getElementById('warehouse-count').value;
+//     addLog(`开始生成 ${count} 条仓库数据...`, 'info');
     
-    fetch('/api/test/generate_warehouse', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({count: parseInt(count)})
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                addLog(`✓ ${result.message}`, 'success');
-                loadStats();
-            } else {
-                addLog(`✗ ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            addLog('✗ 生成仓库失败: ' + error, 'error');
-        });
-}
+//     fetch('/api/test/generate_warehouse', {
+//         method: 'POST',
+//         headers: {'Content-Type': 'application/json'},
+//         body: JSON.stringify({count: parseInt(count)})
+//     })
+//         .then(response => response.json())
+//         .then(result => {
+//             if (result.success) {
+//                 addLog(`✓ ${result.message}`, 'success');
+//                 loadStats();
+//             } else {
+//                 addLog(`✗ ${result.message}`, 'error');
+//             }
+//         })
+//         .catch(error => {
+//             addLog('✗ 生成仓库失败: ' + error, 'error');
+//         });
+// }
 
 // 批量退货
 function batchReturnStock() {

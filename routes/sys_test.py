@@ -127,6 +127,27 @@ def _test_create_customer(commit=True):
     except Exception as e:
         return handle_error(e, "创建客户测试")
 
+def _test_create_employee(commit=True):
+    """测试: 创建员工"""
+    try:
+        name = f"测试员工_{random.randint(1000, 9999)}"
+        employee = EmployeeInfo(
+            name=name,
+            account=f"user_{random.randint(10000, 99999)}",
+            password="password",
+            phone=f"136{random.randint(10000000, 99999999)}",
+            department="测试部门",
+            position="员工"
+        )
+        db.session.add(employee)
+        if commit:
+            db.session.commit()
+            log_success(f"创建员工成功: {employee.name} (ID: {employee.employee_id})")
+            log_system_action(session.get('employee_id'), 'insert', 'employee_info', {'employee_id': employee.employee_id, 'name': employee.name})
+        from flask import jsonify
+        return jsonify({'success': True, 'message': '创建员工测试通过', 'data': {'employee_id': employee.employee_id, 'name': employee.name}})
+    except Exception as e:
+        return handle_error(e, "创建员工测试")
 
 def _test_create_warehouse(commit=True):
     """测试：创建仓库"""
@@ -579,21 +600,24 @@ def route_generate_customer():
 
 @api_test_bp.route('/generate_employee', methods=['POST'])
 def route_generate_employee():
-    try:
-        name = f"测试员工_{random.randint(1000, 9999)}"
-        employee = EmployeeInfo(
-            name=name,
-            account=f"user_{random.randint(10000, 99999)}",
-            password="password",
-            phone=f"136{random.randint(10000000, 99999999)}",
-            department="测试部门",
-            position="员工"
-        )
-        db.session.add(employee)
-        db.session.commit()
-        return jsonify({'success': True, 'message': f'员工 {name} 已生成'})
-    except Exception as e:
-        return handle_error(e, "生成员工数据")
+    res = _test_create_employee()
+    data = res.get_json() if hasattr(res, 'get_json') else res
+    return jsonify({'success': data['success'], 'message': data['message']})
+    # try:
+    #     name = f"测试员工_{random.randint(1000, 9999)}"
+    #     employee = EmployeeInfo(
+    #         name=name,
+    #         account=f"user_{random.randint(10000, 99999)}",
+    #         password="password",
+    #         phone=f"136{random.randint(10000000, 99999999)}",
+    #         department="测试部门",
+    #         position="员工"
+    #     )
+    #     db.session.add(employee)
+    #     db.session.commit()
+    #     return jsonify({'success': True, 'message': f'员工 {name} 已生成'})
+    # except Exception as e:
+    #     return handle_error(e, "生成员工数据")
 
 @api_test_bp.route('/generate_supplier', methods=['POST'])
 def route_generate_supplier():
