@@ -2,7 +2,8 @@
 
 中山大学数据库实验项目 - 完整的医药销售管理系统
 
-![系统截图](image.png)
+<img width="880" height="282" alt="image" src="https://github.com/user-attachments/assets/4d6725f2-50d2-4cfe-846c-fff824d126f6" />
+
 
 ## 🎯 项目简介
 
