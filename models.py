@@ -98,6 +98,9 @@ db = SQLAlchemy()
 # 药品信息表
 class DrugInfo(db.Model):
     __tablename__ = 'drug_info'
+    __table_args__ = (
+        db.UniqueConstraint('name', name='uq_drug_name'),
+    )
     drug_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     spec = db.Column(db.String(100))
@@ -107,7 +110,7 @@ class DrugInfo(db.Model):
     unit = db.Column(db.String(20))
     purchase_price = db.Column(db.Numeric(10, 2), nullable=False)
     sale_price = db.Column(db.Numeric(10, 2), nullable=False)
-    expiry_date = db.Column(db.Date)
+    shelf_life_months = db.Column(db.Integer)  # 保质期（月）
     status = db.Column(db.String(20), default='在售', nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
@@ -115,6 +118,9 @@ class DrugInfo(db.Model):
 # 员工信息表
 class EmployeeInfo(db.Model):
     __tablename__ = 'employee_info'
+    __table_args__ = (
+        db.UniqueConstraint('name', name='uq_employee_name'),
+    )
     employee_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     department = db.Column(db.String(100))
@@ -130,6 +136,9 @@ class EmployeeInfo(db.Model):
 # 客户信息表
 class CustomerInfo(db.Model):
     __tablename__ = 'customer_info'
+    __table_args__ = (
+        db.UniqueConstraint('name', name='uq_customer_name'),
+    )
     customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     type = db.Column(db.String(20), nullable=False)  # 零售/批发

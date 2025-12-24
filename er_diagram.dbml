@@ -1,14 +1,14 @@
 Table drug_info [note: '药品信息表'] {
   drug_id int [pk, note: '药品ID']
-  name varchar [note: '药品名称']
+  name varchar [note: '药品名称', unique]
   spec varchar [note: '规格']
   manufacturer varchar [note: '生产厂家']
-  approval_number varchar [note: '批准文号']
+  approval_number varchar [note: '批准文号', unique]
   category varchar [note: '类别(处方/非处方)']
   unit varchar [note: '单位']
   purchase_price decimal [note: '进价']
   sale_price decimal [note: '售价']
-  expiry_date date [note: '有效期']
+  shelf_life_months int [note: '保质期(月)']
   status varchar [note: '状态(在售/下架)']
   create_time datetime [note: '创建时间']
   update_time datetime [note: '更新时间']
@@ -16,12 +16,12 @@ Table drug_info [note: '药品信息表'] {
 
 Table employee_info [note: '员工信息表'] {
   employee_id int [pk, note: '员工ID']
-  name varchar [note: '姓名']
+  name varchar [note: '姓名', unique]
   department varchar [note: '部门']
   position varchar [note: '职位']
-  phone varchar [note: '电话']
+  phone varchar [note: '电话', unique]
   hire_date date [note: '入职日期']
-  account varchar [note: '账号']
+  account varchar [note: '账号', unique]
   password varchar [note: '密码(加密)']
   status varchar [note: '状态(在职/离职)']
   create_time datetime [note: '创建时间']
@@ -30,10 +30,10 @@ Table employee_info [note: '员工信息表'] {
 
 Table customer_info [note: '客户信息表'] {
   customer_id int [pk, note: '客户ID']
-  name varchar [note: '客户名称']
+  name varchar [note: '客户名称', unique]
   type varchar [note: '类型(零售/批发)']
   contact varchar [note: '联系人']
-  phone varchar [note: '联系电话']
+  phone varchar [note: '联系电话', unique]
   address varchar [note: '地址']
   create_time datetime [note: '创建时间']
   update_time datetime [note: '更新时间']
@@ -41,24 +41,24 @@ Table customer_info [note: '客户信息表'] {
 
 Table supplier_info [note: '供应商信息表'] {
   supplier_id int [pk, note: '供应商ID']
-  name varchar [note: '供应商名称']
+  name varchar [note: '供应商名称', unique]
   contact varchar [note: '联系人']
-  phone varchar [note: '联系电话']
+  phone varchar [note: '联系电话', unique]
   address varchar [note: '地址']
-  qualification_no varchar [note: '资质编号']
+  qualification_no varchar [note: '资质编号', unique]
   create_time datetime [note: '创建时间']
   update_time datetime [note: '更新时间']
 }
 
 Table permission [note: '权限表'] {
   permission_id int [pk, note: '权限ID']
-  name varchar [note: '权限名称']
+  name varchar [note: '权限名称', unique]
   description varchar [note: '描述']
 }
 
 Table role [note: '角色表'] {
   role_id int [pk, note: '角色ID']
-  name varchar [note: '角色名称']
+  name varchar [note: '角色名称', unique]
   description varchar [note: '描述']
 }
 
@@ -66,12 +66,20 @@ Table role_permission [note: '角色权限关联表'] {
   id int [pk, note: '主键']
   role_id int [ref: > role.role_id, note: '角色ID']
   permission_id int [ref: > permission.permission_id, note: '权限ID']
+
+  indexes {
+    (role_id, permission_id) [unique]
+  }
 }
 
 Table user_role [note: '用户角色关联表'] {
   id int [pk, note: '主键']
   employee_id int [ref: > employee_info.employee_id, note: '员工ID']
   role_id int [ref: > role.role_id, note: '角色ID']
+
+  indexes {
+    (employee_id, role_id) [unique]
+  }
 }
 
 Table system_log [note: '系统日志表'] {
@@ -103,11 +111,15 @@ Table inventory [note: '库存表'] {
   last_check_date date [note: '上次盘点日期']
   create_time datetime [note: '创建时间']
   update_time datetime [note: '更新时间']
+
+  indexes {
+    (drug_id, warehouse_id) [unique]
+  }
 }
 
 Table warehouse [note: '仓库表'] {
   warehouse_id int [pk, note: '仓库ID']
-  name varchar [note: '仓库名称']
+  name varchar [note: '仓库名称', unique]
   address varchar [note: '地址']
   manager_id int [ref: > employee_info.employee_id, note: '负责人ID']
   create_time datetime [note: '创建时间']
@@ -165,4 +177,8 @@ Table finance_stat [note: '财务统计表'] {
   total_profit decimal [note: '总利润']
   employee_id int [ref: > employee_info.employee_id, note: '操作员工ID']
   create_time datetime [note: '创建时间']
+
+  indexes {
+    (stat_type, stat_date) [unique]
+  }
 }

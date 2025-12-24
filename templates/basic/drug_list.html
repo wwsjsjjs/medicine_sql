@@ -45,7 +45,7 @@
                 <td>{{ drug.unit or '-' }}</td>
                 <td>¥{{ "%.2f"|format(drug.purchase_price or 0) }}</td>
                 <td>¥{{ "%.2f"|format(drug.sale_price or 0) }}</td>
-                <td>{{ drug.expiry_date or '-' }}</td>
+                <td>{{ drug.shelf_life_months or '-' }} 月</td>
                 <td>
                     {% if drug.status == '在售' %}
                         <span class="badge badge-success">在售</span>

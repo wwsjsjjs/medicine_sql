@@ -2,12 +2,55 @@
 销售管理模块路由
 包括：销售登记、销售退货、财务统计
 """
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Sales, SalesReturn, FinanceStat, DrugInfo, CustomerInfo, EmployeeInfo, Inventory
 from datetime import datetime, timedelta
 from sqlalchemy import func, extract
 
 sales_bp = Blueprint('sales', __name__, url_prefix='/sales')
+
+
+def _upsert_daily_finance(stat_date, employee_id=None):
+    """按日计算净销售/成本（销售-退货），写入finance_stat。"""
+    from decimal import Decimal
+    sales_sum = db.session.query(func.sum(Sales.quantity * DrugInfo.sale_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(Sales.sales_date == stat_date).scalar() or 0
+    cost_sum = db.session.query(func.sum(Sales.quantity * DrugInfo.purchase_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(Sales.sales_date == stat_date).scalar() or 0
+    return_sales = db.session.query(func.sum(SalesReturn.quantity * DrugInfo.sale_price)).\
+        join(Sales, SalesReturn.sales_id == Sales.sales_id).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(SalesReturn.return_date == stat_date).scalar() or 0
+    return_cost = db.session.query(func.sum(SalesReturn.quantity * DrugInfo.purchase_price)).\
+        join(Sales, SalesReturn.sales_id == Sales.sales_id).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(SalesReturn.return_date == stat_date).scalar() or 0
+
+    net_sales = Decimal(str(sales_sum)) - Decimal(str(return_sales))
+    net_cost = Decimal(str(cost_sum)) - Decimal(str(return_cost))
+    net_profit = net_sales - net_cost
+
+    stat = FinanceStat.query.filter_by(stat_type='日', stat_date=stat_date).first()
+    if stat:
+        stat.total_sales = net_sales
+        stat.total_cost = net_cost
+        stat.total_profit = net_profit
+        if employee_id:
+            stat.employee_id = employee_id
+    else:
+        stat = FinanceStat(
+            stat_type='日',
+            stat_date=stat_date,
+            total_sales=net_sales,
+            total_cost=net_cost,
+            total_profit=net_profit,
+            employee_id=employee_id
+        )
+        db.session.add(stat)
+    db.session.commit()
+    return stat
 
 # ==================== 销售登记 ====================
 @sales_bp.route('/sales')
@@ -149,50 +192,40 @@ def finance_generate():
     stat_date = datetime.strptime(request.form['stat_date'], '%Y-%m-%d').date()
     admin = EmployeeInfo.query.filter_by(account='admin').first()
     employee_id = request.form.get('employee_id') or (admin.employee_id if admin else None)
-    
-    filters = []
+
     if stat_type == '日':
-        filters.append(Sales.sales_date == stat_date)
-    else:  # 月
-        filters.append(extract('year', Sales.sales_date) == stat_date.year)
-        filters.append(extract('month', Sales.sales_date) == stat_date.month)
+        _upsert_daily_finance(stat_date, employee_id)
+    else:  # 月：聚合当月所有日报
+        first_day = stat_date.replace(day=1)
+        next_month = (first_day + timedelta(days=32)).replace(day=1)
+        current = first_day
+        while current < next_month:
+            _upsert_daily_finance(current, employee_id)
+            current += timedelta(days=1)
+        agg = db.session.query(
+            func.sum(FinanceStat.total_sales),
+            func.sum(FinanceStat.total_cost),
+            func.sum(FinanceStat.total_profit)
+        ).filter_by(stat_type='日').\
+            filter(FinanceStat.stat_date >= first_day, FinanceStat.stat_date < next_month).first()
+        stat = FinanceStat.query.filter_by(stat_type='月', stat_date=first_day).first()
+        if stat:
+            stat.total_sales, stat.total_cost, stat.total_profit = agg
+            if employee_id:
+                stat.employee_id = employee_id
+        else:
+            stat = FinanceStat(
+                stat_type='月',
+                stat_date=first_day,
+                total_sales=agg[0] or 0,
+                total_cost=agg[1] or 0,
+                total_profit=agg[2] or 0,
+                employee_id=employee_id
+            )
+            db.session.add(stat)
+        db.session.commit()
 
-    # 业务计算：销售额、成本、利润（按药品售价/进价计算，不存表中）
-    from decimal import Decimal
-    total_sales = db.session.query(func.sum(Sales.quantity * DrugInfo.sale_price)).\
-        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        filter(*filters).scalar() or 0
-    total_cost = db.session.query(func.sum(Sales.quantity * DrugInfo.purchase_price)).\
-        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        filter(*filters).scalar() or 0
-
-    total_sales = Decimal(str(total_sales)) if total_sales else Decimal('0')
-    total_cost = Decimal(str(total_cost)) if total_cost else Decimal('0')
-    total_profit = total_sales - total_cost
-    
-    # 数据库执行：存在则更新，不存在则插入
-    finance_stat = FinanceStat.query.filter_by(stat_type=stat_type, stat_date=stat_date).first()
-    if finance_stat:
-        # 已存在则更新
-        finance_stat.total_sales = total_sales
-        finance_stat.total_cost = total_cost
-        finance_stat.total_profit = total_profit
-        finance_stat.employee_id = employee_id
-        flash('财务统计更新成功！', 'success')
-    else:
-        # 不存在则插入
-        finance_stat = FinanceStat(
-            stat_type=stat_type,
-            stat_date=stat_date,
-            total_sales=total_sales,
-            total_cost=total_cost,
-            total_profit=total_profit,
-            employee_id=employee_id
-        )
-        db.session.add(finance_stat)
-        flash('财务统计生成成功！', 'success')
-    
-    db.session.commit()
+    flash('财务统计生成成功！', 'success')
     return redirect(url_for('sales.finance_list'))
 
 # ==================== 销售报表 ====================
@@ -200,42 +233,22 @@ def finance_generate():
 def report_week():
     """最近一周销售情况（READ）"""
     end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=7)
-    
-    # 按日期统计
-    daily_sales = db.session.query(
-        Sales.sales_date,
-        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
-    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        filter(Sales.sales_date.between(start_date, end_date)).\
-        group_by(Sales.sales_date).all()
-    
-    # 按药品统计
-    drug_sales = db.session.query(
-        DrugInfo.name,
-        func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
-    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        filter(Sales.sales_date.between(start_date, end_date)).\
-        group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.quantity * DrugInfo.sale_price).desc()).all()
-    
-    return render_template('sales/report_week.html', 
-                         daily_sales=daily_sales, 
-                         drug_sales=drug_sales,
+    start_date = end_date - timedelta(days=6)
+    admin = EmployeeInfo.query.filter_by(account='admin').first()
+    employee_id = admin.employee_id if admin else None
+
+    current = start_date
+    while current <= end_date:
+        _upsert_daily_finance(current, employee_id)
+        current += timedelta(days=1)
+
+    daily_stats = FinanceStat.query.filter_by(stat_type='日').\
+        filter(FinanceStat.stat_date.between(start_date, end_date)).\
+        order_by(FinanceStat.stat_date).all()
+    daily_sales = [(stat.stat_date, stat.total_sales) for stat in daily_stats]
+
+    return render_template('sales/report_week.html',
+                         daily_sales=daily_sales,
+                         drug_sales=[],
                          start_date=start_date,
                          end_date=end_date)
-
-@sales_bp.route('/report/top')
-def report_top():
-    """药品销售排行（READ）"""
-    top_drugs = db.session.query(
-        DrugInfo.name,
-        func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
-    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.quantity * DrugInfo.sale_price).desc()).\
-        limit(20).all()
-    
-    return render_template('sales/report_top.html', top_drugs=top_drugs)

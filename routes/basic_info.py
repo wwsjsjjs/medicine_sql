@@ -3,7 +3,7 @@
 包括：药品、员工、客户、供应商管理
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
-from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo, log_system_action
+from models import db, DrugInfo, EmployeeInfo, CustomerInfo, SupplierInfo, Role, UserRole, log_system_action
 from datetime import datetime
 
 basic_bp = Blueprint('basic', __name__, url_prefix='/basic')
@@ -19,7 +19,8 @@ def drug_list():
 def drug_add():
     """添加药品（CREATE）"""
     if request.method == 'POST':
-        # 输入处理：从表单读取基础字段，包含可选的有效期
+        # 输入处理：基础字段，保质期按月填写
+        shelf_life_months = int(request.form['shelf_life_months']) if request.form.get('shelf_life_months') else None
         drug = DrugInfo(
             name=request.form['name'],
             spec=request.form.get('spec'),
@@ -29,7 +30,7 @@ def drug_add():
             unit=request.form.get('unit'),
             purchase_price=request.form.get('purchase_price'),
             sale_price=request.form.get('sale_price'),
-            expiry_date=datetime.strptime(request.form['expiry_date'], '%Y-%m-%d').date() if request.form.get('expiry_date') else None,
+            shelf_life_months=shelf_life_months,
             status=request.form.get('status', '在售')
         )
         # 数据库执行：写入药品表
@@ -49,7 +50,8 @@ def drug_edit(drug_id):
     """编辑药品（UPDATE）"""
     drug = DrugInfo.query.get_or_404(drug_id)
     if request.method == 'POST':
-        # 输入处理与校验：表单字段更新，包含可选有效期
+        # 输入处理与校验：保质期按月
+        shelf_life_months = int(request.form['shelf_life_months']) if request.form.get('shelf_life_months') else None
         drug.name = request.form['name']
         drug.spec = request.form.get('spec')
         drug.manufacturer = request.form.get('manufacturer')
@@ -58,7 +60,7 @@ def drug_edit(drug_id):
         drug.unit = request.form.get('unit')
         drug.purchase_price = request.form.get('purchase_price')
         drug.sale_price = request.form.get('sale_price')
-        drug.expiry_date = datetime.strptime(request.form['expiry_date'], '%Y-%m-%d').date() if request.form.get('expiry_date') else None
+        drug.shelf_life_months = shelf_life_months
         drug.status = request.form.get('status')
         drug.update_time = datetime.now()
         # 数据库执行：提交更新
@@ -112,6 +114,12 @@ def employee_add():
         # 数据库执行：插入员工
         db.session.add(employee)
         db.session.commit()
+        # 角色关联：根据选择的角色ID绑定用户角色（单角色）
+        role_id = request.form.get('role_id')
+        if role_id:
+            UserRole.query.filter_by(employee_id=employee.employee_id).delete()
+            db.session.add(UserRole(employee_id=employee.employee_id, role_id=role_id))
+            db.session.commit()
         # 操作日志
         log_system_action(session.get('employee_id'), 'insert', 'employee_info', {
             'employee_id': employee.employee_id,
@@ -119,12 +127,14 @@ def employee_add():
         })
         flash('员工添加成功！', 'success')
         return redirect(url_for('basic.employee_list'))
-    return render_template('basic/employee_form.html', employee=None)
+    roles = Role.query.order_by(Role.role_id).all()
+    return render_template('basic/employee_form.html', employee=None, roles=roles, current_role_id=None)
 
 @basic_bp.route('/employees/edit/<int:employee_id>', methods=['GET', 'POST'])
 def employee_edit(employee_id):
     """编辑员工（UPDATE）"""
     employee = EmployeeInfo.query.get_or_404(employee_id)
+    current_role = UserRole.query.filter_by(employee_id=employee_id).first()
     if request.method == 'POST':
         # 输入处理：更新基础资料，密码仅在提交时更新
         employee.name = request.form['name']
@@ -139,6 +149,12 @@ def employee_edit(employee_id):
         employee.update_time = datetime.now()
         # 数据库执行：提交更新
         db.session.commit()
+        # 角色关联：更新为选择的角色（单角色）
+        role_id = request.form.get('role_id')
+        UserRole.query.filter_by(employee_id=employee.employee_id).delete()
+        if role_id:
+            db.session.add(UserRole(employee_id=employee.employee_id, role_id=role_id))
+        db.session.commit()
         # 操作日志
         log_system_action(session.get('employee_id'), 'update', 'employee_info', {
             'employee_id': employee.employee_id,
@@ -146,7 +162,8 @@ def employee_edit(employee_id):
         })
         flash('员工更新成功！', 'success')
         return redirect(url_for('basic.employee_list'))
-    return render_template('basic/employee_form.html', employee=employee)
+    roles = Role.query.order_by(Role.role_id).all()
+    return render_template('basic/employee_form.html', employee=employee, roles=roles, current_role_id=current_role.role_id if current_role else None)
 
 @basic_bp.route('/employees/delete/<int:employee_id>')
 def employee_delete(employee_id):

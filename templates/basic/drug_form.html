@@ -79,11 +79,12 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="expiry_date">有效期</label>
-                <input type="date" id="expiry_date" name="expiry_date" class="form-control" 
-                       value="{{ drug.expiry_date if drug else '' }}">
+                <label for="shelf_life_months">保质期（月）</label>
+                <input type="number" min="1" id="shelf_life_months" name="shelf_life_months" class="form-control"
+                       value="{{ drug.shelf_life_months if drug and drug.shelf_life_months is not none else '' }}" 
+                       placeholder="例如：6 表示 6 个月">
             </div>
-            
+
             <div class="form-group">
                 <label for="status">状态</label>
                 <select id="status" name="status" class="form-control">
@@ -106,6 +107,7 @@ function validateDrugForm() {
     const purchasePrice = parseFloat(document.getElementById('purchase_price').value) || 0;
     const salePrice = parseFloat(document.getElementById('sale_price').value) || 0;
     const approval = document.getElementById('approval_number').value.trim();
+    const shelfLife = document.getElementById('shelf_life_months').value;
     
     if (!name) {
         alert('请输入药品名称');
@@ -128,6 +130,11 @@ function validateDrugForm() {
         if (!confirm('批准文号格式可能不正确（应为：国药准字Z20210001），是否继续？')) {
             return false;
         }
+    }
+
+    if (shelfLife && Number(shelfLife) <= 0) {
+        alert('保质期必须为正数（月）');
+        return false;
     }
     
     return true;

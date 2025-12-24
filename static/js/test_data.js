@@ -73,6 +73,19 @@ const TestDataGenerator = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
+    // 生成随机日期（返回yyyy-MM-dd）
+    randomDate: function(startOffsetDays, endOffsetDays) {
+        const now = new Date();
+        const min = startOffsetDays || 0;
+        const max = endOffsetDays || 365;
+        const offset = Math.floor(Math.random() * (max - min + 1)) + min;
+        const d = new Date(now.getTime() + offset * 24 * 60 * 60 * 1000);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    },
+
     // 快速填充表单
     fillForm: function(formType) {
         switch(formType) {
@@ -84,7 +97,9 @@ const TestDataGenerator = {
                     approval_number: '国药准字Z' + Math.floor(Math.random() * 1000000),
                     unit: '盒',
                     purchase_price: this.randomPrice(5, 50),
-                    sale_price: this.randomPrice(10, 100)
+                    sale_price: this.randomPrice(10, 100),
+                    // 保质期：6-24 个月随机
+                    shelf_life_months: this.randomQuantity(6, 24)
                 };
             
             case 'employee':
@@ -92,7 +107,9 @@ const TestDataGenerator = {
                     name: this.getRandom(this.names),
                     phone: this.getRandom(this.phones),
                     account: 'user' + Math.floor(Math.random() * 1000),
-                    password: '123456'
+                    password: '123456',
+                    department: null, // 让下拉随机
+                    role_id: null      // 让下拉随机
                 };
             
             case 'customer':
@@ -120,13 +137,20 @@ const TestDataGenerator = {
             
             case 'stock_in':
                 return {
+                    drug_id: null,          // 下拉随机
+                    supplier_id: null,      // 下拉随机
+                    warehouse_id: null,     // 下拉随机
                     quantity: this.randomQuantity(50, 500),
+                    stock_in_date: this.randomDate(-3, 0),
                     remark: '测试入库'
                 };
             
             case 'sales':
                 return {
-                    quantity: this.randomQuantity(1, 50)
+                    drug_id: null,      // 下拉随机
+                    customer_id: null,  // 下拉随机
+                    quantity: this.randomQuantity(1, 50),
+                    sales_date: this.randomDate(-3, 0)
                 };
         }
     }
@@ -137,10 +161,26 @@ function quickFill(formType) {
     const data = TestDataGenerator.fillForm(formType);
     
     for (let key in data) {
+        // 优先匹配下拉框，随机选项或指定值
+        const selectEl = document.querySelector(`select[name="${key}"]`);
+        if (selectEl) {
+            // 如果 data 中有明确值，用该值；否则随机选可选项（跳过空选）
+            if (data[key]) {
+                selectEl.value = data[key];
+            } else {
+                const options = Array.from(selectEl.options).filter(o => o.value);
+                if (options.length > 0) {
+                    const rand = options[Math.floor(Math.random() * options.length)].value;
+                    selectEl.value = rand;
+                }
+            }
+            selectEl.dispatchEvent(new Event('change'));
+            continue;
+        }
+
         const input = document.querySelector(`[name="${key}"]`);
         if (input) {
             input.value = data[key];
-            // 触发change事件以更新UI
             input.dispatchEvent(new Event('change'));
             input.dispatchEvent(new Event('input'));
         }
