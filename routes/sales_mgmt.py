@@ -12,7 +12,7 @@ sales_bp = Blueprint('sales', __name__, url_prefix='/sales')
 # ==================== 销售登记 ====================
 @sales_bp.route('/sales')
 def sales_list():
-    """销售列表"""
+    """销售列表（READ）"""
     sales_list = db.session.query(Sales, DrugInfo.name, CustomerInfo.name, EmployeeInfo.name).\
         join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         join(CustomerInfo, Sales.customer_id == CustomerInfo.customer_id).\
@@ -22,13 +22,12 @@ def sales_list():
 
 @sales_bp.route('/sales/add', methods=['GET', 'POST'])
 def sales_add():
-    """添加销售"""
+    """添加销售（CREATE）"""
     if request.method == 'POST':
         quantity = int(request.form['quantity'])
-        unit_price = float(request.form['unit_price'])
         warehouse_id = request.form.get('warehouse_id', 1)
         
-        # 验证药品是否存在
+        # 输入校验：药品、客户存在
         drug = DrugInfo.query.get(request.form['drug_id'])
         if not drug:
             flash('指定的药品不存在！', 'danger')
@@ -40,7 +39,7 @@ def sales_add():
             flash('指定的客户不存在，请先添加客户信息！', 'danger')
             return redirect(url_for('sales.sales_add'))
         
-        # 验证库存是否存在且足够
+        # 业务校验：库存存在且数量足够
         inventory = Inventory.query.filter_by(
             drug_id=request.form['drug_id'],
             warehouse_id=warehouse_id
@@ -52,18 +51,17 @@ def sales_add():
             flash(f'库存不足！当前库存：{inventory.quantity}，销售数量：{quantity}', 'danger')
             return redirect(url_for('sales.sales_add'))
         
+        # 数据库执行：插入销售记录（价格取药品售价，表中不再存价格字段）
         sale = Sales(
             drug_id=request.form['drug_id'],
             customer_id=request.form['customer_id'],
             quantity=quantity,
-            unit_price=unit_price,
-            total_price=quantity * unit_price,
             sales_date=datetime.strptime(request.form['sales_date'], '%Y-%m-%d').date(),
             employee_id=request.form.get('employee_id', 1)
         )
         db.session.add(sale)
         
-        # 减少库存
+        # 数据库执行：扣减库存
         inventory.quantity -= quantity
         
         db.session.commit()
@@ -77,7 +75,7 @@ def sales_add():
 # ==================== 销售退货 ====================
 @sales_bp.route('/return')
 def return_list():
-    """销售退货列表"""
+    """销售退货列表（READ）"""
     returns = db.session.query(SalesReturn, Sales, DrugInfo.name, EmployeeInfo.name).\
         join(Sales, SalesReturn.sales_id == Sales.sales_id).\
         join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
@@ -86,22 +84,23 @@ def return_list():
 
 @sales_bp.route('/return/add', methods=['GET', 'POST'])
 def return_add():
-    """添加销售退货"""
+    """添加销售退货（CREATE）"""
     if request.method == 'POST':
         quantity = int(request.form['quantity'])
         warehouse_id = request.form.get('warehouse_id', 1)
         
-        # 验证销售记录是否存在
+        # 输入校验：销售记录存在
         sale = Sales.query.get(request.form['sales_id'])
         if not sale:
             flash('指定的销售记录不存在！', 'danger')
             return redirect(url_for('sales.return_add'))
         
-        # 验证退货数量是否合理
+        # 业务校验：退货数量不能超过销售数量
         if quantity > sale.quantity:
             flash(f'退货数量不能超过销售数量！销售数量：{sale.quantity}', 'danger')
             return redirect(url_for('sales.return_add'))
         
+        # 数据库执行：插入退货记录
         sales_return = SalesReturn(
             sales_id=request.form['sales_id'],
             quantity=quantity,
@@ -111,7 +110,7 @@ def return_add():
         )
         db.session.add(sales_return)
         
-        # 增加库存
+        # 数据库执行：回补库存（存在则累加，不存在则创建）
         inventory = Inventory.query.filter_by(
             drug_id=sale.drug_id,
             warehouse_id=warehouse_id
@@ -137,7 +136,7 @@ def return_add():
 # ==================== 财务统计 ====================
 @sales_bp.route('/finance')
 def finance_list():
-    """财务统计列表"""
+    """财务统计列表（READ）"""
     stats = db.session.query(FinanceStat, EmployeeInfo.name).\
         join(EmployeeInfo, FinanceStat.employee_id == EmployeeInfo.employee_id).\
         order_by(FinanceStat.stat_date.desc()).all()
@@ -145,7 +144,7 @@ def finance_list():
 
 @sales_bp.route('/finance/generate', methods=['POST'])
 def finance_generate():
-    """生成财务统计"""
+    """生成财务统计（CREATE/UPDATE）"""
     stat_type = request.form['stat_type']
     stat_date = datetime.strptime(request.form['stat_date'], '%Y-%m-%d').date()
     admin = EmployeeInfo.query.filter_by(account='admin').first()
@@ -158,9 +157,10 @@ def finance_generate():
         filters.append(extract('year', Sales.sales_date) == stat_date.year)
         filters.append(extract('month', Sales.sales_date) == stat_date.month)
 
-    # 销售额与成本（按销售数量 * 进货价统计）
+    # 业务计算：销售额、成本、利润（按药品售价/进价计算，不存表中）
     from decimal import Decimal
-    total_sales = db.session.query(func.sum(Sales.total_price)).\
+    total_sales = db.session.query(func.sum(Sales.quantity * DrugInfo.sale_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         filter(*filters).scalar() or 0
     total_cost = db.session.query(func.sum(Sales.quantity * DrugInfo.purchase_price)).\
         join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
@@ -170,7 +170,7 @@ def finance_generate():
     total_cost = Decimal(str(total_cost)) if total_cost else Decimal('0')
     total_profit = total_sales - total_cost
     
-    # 检查是否已存在相同的统计记录
+    # 数据库执行：存在则更新，不存在则插入
     finance_stat = FinanceStat.query.filter_by(stat_type=stat_type, stat_date=stat_date).first()
     if finance_stat:
         # 已存在则更新
@@ -198,26 +198,27 @@ def finance_generate():
 # ==================== 销售报表 ====================
 @sales_bp.route('/report/week')
 def report_week():
-    """最近一周销售情况"""
+    """最近一周销售情况（READ）"""
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=7)
     
     # 按日期统计
     daily_sales = db.session.query(
         Sales.sales_date,
-        func.sum(Sales.total_price).label('total')
-    ).filter(Sales.sales_date.between(start_date, end_date)).\
+        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
+    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(Sales.sales_date.between(start_date, end_date)).\
         group_by(Sales.sales_date).all()
     
     # 按药品统计
     drug_sales = db.session.query(
         DrugInfo.name,
         func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.total_price).label('total')
+        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
     ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         filter(Sales.sales_date.between(start_date, end_date)).\
         group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.total_price).desc()).all()
+        order_by(func.sum(Sales.quantity * DrugInfo.sale_price).desc()).all()
     
     return render_template('sales/report_week.html', 
                          daily_sales=daily_sales, 
@@ -227,14 +228,14 @@ def report_week():
 
 @sales_bp.route('/report/top')
 def report_top():
-    """药品销售排行"""
+    """药品销售排行（READ）"""
     top_drugs = db.session.query(
         DrugInfo.name,
         func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.total_price).label('total')
+        func.sum(Sales.quantity * DrugInfo.sale_price).label('total')
     ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.total_price).desc()).\
+        order_by(func.sum(Sales.quantity * DrugInfo.sale_price).desc()).\
         limit(20).all()
     
     return render_template('sales/report_top.html', top_drugs=top_drugs)

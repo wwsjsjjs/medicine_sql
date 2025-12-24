@@ -17,8 +17,9 @@ def drug_list():
 
 @basic_bp.route('/drugs/add', methods=['GET', 'POST'])
 def drug_add():
-    """添加药品"""
+    """添加药品（CREATE）"""
     if request.method == 'POST':
+        # 输入处理：从表单读取基础字段，包含可选的有效期
         drug = DrugInfo(
             name=request.form['name'],
             spec=request.form.get('spec'),
@@ -31,8 +32,10 @@ def drug_add():
             expiry_date=datetime.strptime(request.form['expiry_date'], '%Y-%m-%d').date() if request.form.get('expiry_date') else None,
             status=request.form.get('status', '在售')
         )
+        # 数据库执行：写入药品表
         db.session.add(drug)
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'insert', 'drug_info', {
             'drug_id': drug.drug_id,
             'name': drug.name
@@ -43,9 +46,10 @@ def drug_add():
 
 @basic_bp.route('/drugs/edit/<int:drug_id>', methods=['GET', 'POST'])
 def drug_edit(drug_id):
-    """编辑药品"""
+    """编辑药品（UPDATE）"""
     drug = DrugInfo.query.get_or_404(drug_id)
     if request.method == 'POST':
+        # 输入处理与校验：表单字段更新，包含可选有效期
         drug.name = request.form['name']
         drug.spec = request.form.get('spec')
         drug.manufacturer = request.form.get('manufacturer')
@@ -57,7 +61,9 @@ def drug_edit(drug_id):
         drug.expiry_date = datetime.strptime(request.form['expiry_date'], '%Y-%m-%d').date() if request.form.get('expiry_date') else None
         drug.status = request.form.get('status')
         drug.update_time = datetime.now()
+        # 数据库执行：提交更新
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'update', 'drug_info', {
             'drug_id': drug.drug_id,
             'name': drug.name
@@ -68,10 +74,12 @@ def drug_edit(drug_id):
 
 @basic_bp.route('/drugs/delete/<int:drug_id>')
 def drug_delete(drug_id):
-    """删除药品"""
+    """删除药品（DELETE）"""
     drug = DrugInfo.query.get_or_404(drug_id)
+    # 数据库执行：删除记录
     db.session.delete(drug)
     db.session.commit()
+    # 操作日志
     log_system_action(session.get('employee_id'), 'delete', 'drug_info', {
         'drug_id': drug.drug_id,
         'name': drug.name
@@ -82,14 +90,15 @@ def drug_delete(drug_id):
 # ==================== 员工管理 ====================
 @basic_bp.route('/employees')
 def employee_list():
-    """员工列表"""
+    """员工列表（READ）"""
     employees = EmployeeInfo.query.all()
     return render_template('basic/employee_list.html', employees=employees)
 
 @basic_bp.route('/employees/add', methods=['GET', 'POST'])
 def employee_add():
-    """添加员工"""
+    """添加员工（CREATE）"""
     if request.method == 'POST':
+        # 输入处理：基础资料与账户信息（密码未加密，生产需加密）
         employee = EmployeeInfo(
             name=request.form['name'],
             department=request.form.get('department'),
@@ -100,8 +109,10 @@ def employee_add():
             password=request.form.get('password'),  # 实际应用需要加密
             status=request.form.get('status', '在职')
         )
+        # 数据库执行：插入员工
         db.session.add(employee)
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'insert', 'employee_info', {
             'employee_id': employee.employee_id,
             'name': employee.name
@@ -112,9 +123,10 @@ def employee_add():
 
 @basic_bp.route('/employees/edit/<int:employee_id>', methods=['GET', 'POST'])
 def employee_edit(employee_id):
-    """编辑员工"""
+    """编辑员工（UPDATE）"""
     employee = EmployeeInfo.query.get_or_404(employee_id)
     if request.method == 'POST':
+        # 输入处理：更新基础资料，密码仅在提交时更新
         employee.name = request.form['name']
         employee.department = request.form.get('department')
         employee.position = request.form.get('position')
@@ -125,7 +137,9 @@ def employee_edit(employee_id):
             employee.password = request.form.get('password')
         employee.status = request.form.get('status')
         employee.update_time = datetime.now()
+        # 数据库执行：提交更新
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'update', 'employee_info', {
             'employee_id': employee.employee_id,
             'name': employee.name
@@ -136,10 +150,12 @@ def employee_edit(employee_id):
 
 @basic_bp.route('/employees/delete/<int:employee_id>')
 def employee_delete(employee_id):
-    """删除员工"""
+    """删除员工（DELETE）"""
     employee = EmployeeInfo.query.get_or_404(employee_id)
+    # 数据库执行：删除记录
     db.session.delete(employee)
     db.session.commit()
+    # 操作日志
     log_system_action(session.get('employee_id'), 'delete', 'employee_info', {
         'employee_id': employee.employee_id,
         'name': employee.name
@@ -150,14 +166,15 @@ def employee_delete(employee_id):
 # ==================== 客户管理 ====================
 @basic_bp.route('/customers')
 def customer_list():
-    """客户列表"""
+    """客户列表（READ）"""
     customers = CustomerInfo.query.all()
     return render_template('basic/customer_list.html', customers=customers)
 
 @basic_bp.route('/customers/add', methods=['GET', 'POST'])
 def customer_add():
-    """添加客户"""
+    """添加客户（CREATE）"""
     if request.method == 'POST':
+        # 输入处理：基础客户资料
         customer = CustomerInfo(
             name=request.form['name'],
             type=request.form.get('type'),
@@ -165,8 +182,10 @@ def customer_add():
             phone=request.form.get('phone'),
             address=request.form.get('address')
         )
+        # 数据库执行：插入客户
         db.session.add(customer)
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'insert', 'customer_info', {
             'customer_id': customer.customer_id,
             'name': customer.name
@@ -177,16 +196,19 @@ def customer_add():
 
 @basic_bp.route('/customers/edit/<int:customer_id>', methods=['GET', 'POST'])
 def customer_edit(customer_id):
-    """编辑客户"""
+    """编辑客户（UPDATE）"""
     customer = CustomerInfo.query.get_or_404(customer_id)
     if request.method == 'POST':
+        # 输入处理：更新客户资料
         customer.name = request.form['name']
         customer.type = request.form.get('type')
         customer.contact = request.form.get('contact')
         customer.phone = request.form.get('phone')
         customer.address = request.form.get('address')
         customer.update_time = datetime.now()
+        # 数据库执行：提交更新
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'update', 'customer_info', {
             'customer_id': customer.customer_id,
             'name': customer.name
@@ -197,10 +219,12 @@ def customer_edit(customer_id):
 
 @basic_bp.route('/customers/delete/<int:customer_id>')
 def customer_delete(customer_id):
-    """删除客户"""
+    """删除客户（DELETE）"""
     customer = CustomerInfo.query.get_or_404(customer_id)
+    # 数据库执行：删除记录
     db.session.delete(customer)
     db.session.commit()
+    # 操作日志
     log_system_action(session.get('employee_id'), 'delete', 'customer_info', {
         'customer_id': customer.customer_id,
         'name': customer.name
@@ -211,14 +235,15 @@ def customer_delete(customer_id):
 # ==================== 供应商管理 ====================
 @basic_bp.route('/suppliers')
 def supplier_list():
-    """供应商列表"""
+    """供应商列表（READ）"""
     suppliers = SupplierInfo.query.all()
     return render_template('basic/supplier_list.html', suppliers=suppliers)
 
 @basic_bp.route('/suppliers/add', methods=['GET', 'POST'])
 def supplier_add():
-    """添加供应商"""
+    """添加供应商（CREATE）"""
     if request.method == 'POST':
+        # 输入处理：基础供应商资料
         supplier = SupplierInfo(
             name=request.form['name'],
             contact=request.form.get('contact'),
@@ -226,8 +251,10 @@ def supplier_add():
             address=request.form.get('address'),
             qualification_no=request.form.get('qualification_no')
         )
+        # 数据库执行：插入供应商
         db.session.add(supplier)
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'insert', 'supplier_info', {
             'supplier_id': supplier.supplier_id,
             'name': supplier.name
@@ -238,16 +265,19 @@ def supplier_add():
 
 @basic_bp.route('/suppliers/edit/<int:supplier_id>', methods=['GET', 'POST'])
 def supplier_edit(supplier_id):
-    """编辑供应商"""
+    """编辑供应商（UPDATE）"""
     supplier = SupplierInfo.query.get_or_404(supplier_id)
     if request.method == 'POST':
+        # 输入处理：更新供应商资料
         supplier.name = request.form['name']
         supplier.contact = request.form.get('contact')
         supplier.phone = request.form.get('phone')
         supplier.address = request.form.get('address')
         supplier.qualification_no = request.form.get('qualification_no')
         supplier.update_time = datetime.now()
+        # 数据库执行：提交更新
         db.session.commit()
+        # 操作日志
         log_system_action(session.get('employee_id'), 'update', 'supplier_info', {
             'supplier_id': supplier.supplier_id,
             'name': supplier.name
@@ -258,10 +288,12 @@ def supplier_edit(supplier_id):
 
 @basic_bp.route('/suppliers/delete/<int:supplier_id>')
 def supplier_delete(supplier_id):
-    """删除供应商"""
+    """删除供应商（DELETE）"""
     supplier = SupplierInfo.query.get_or_404(supplier_id)
+    # 数据库执行：删除记录
     db.session.delete(supplier)
     db.session.commit()
+    # 操作日志
     log_system_action(session.get('employee_id'), 'delete', 'supplier_info', {
         'supplier_id': supplier.supplier_id,
         'name': supplier.name

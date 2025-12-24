@@ -19,8 +19,6 @@
                 <th>药品名称</th>
                 <th>客户</th>
                 <th>数量</th>
-                <th>单价</th>
-                <th>总价</th>
                 <th>销售日期</th>
                 <th>经办人</th>
             </tr>
@@ -32,8 +30,6 @@
                 <td><strong>{{ drug_name }}</strong></td>
                 <td>{{ customer_name }}</td>
                 <td>{{ sale.quantity }}</td>
-                <td>¥{{ "%.2f"|format(sale.unit_price) }}</td>
-                <td><strong>¥{{ "%.2f"|format(sale.total_price) }}</strong></td>
                 <td>{{ sale.sales_date }}</td>
                 <td>{{ employee_name }}</td>
             </tr>

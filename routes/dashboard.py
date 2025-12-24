@@ -2,8 +2,21 @@
 数据分析和仪表盘模块
 """
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app
-from models import db, Sales, DrugInfo, Inventory, FinanceStat, StockIn, EmployeeInfo, init_basic_tables
-from datetime import datetime, timedelta
+from models import (
+    db,
+    Sales,
+    DrugInfo,
+    Inventory,
+    FinanceStat,
+    EmployeeInfo,
+    Permission,
+    Role,
+    RolePermission,
+    UserRole,
+    SystemLog,
+    init_basic_tables,
+)
+from datetime import datetime
 from sqlalchemy import func, extract
 import pathlib
 
@@ -14,12 +27,14 @@ def index():
     """仪表盘首页"""
     # 今日销售额
     today = datetime.now().date()
-    today_sales = db.session.query(func.sum(Sales.total_price)).\
+    today_sales = db.session.query(func.sum(Sales.quantity * DrugInfo.sale_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         filter(Sales.sales_date == today).scalar() or 0
     
     # 本月销售额
     current_month = datetime.now()
-    month_sales = db.session.query(func.sum(Sales.total_price)).\
+    month_sales = db.session.query(func.sum(Sales.quantity * DrugInfo.sale_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
         filter(extract('year', Sales.sales_date) == current_month.year).\
         filter(extract('month', Sales.sales_date) == current_month.month).scalar() or 0
     
@@ -33,43 +48,37 @@ def index():
     # 药品总数
     total_drugs = db.session.query(func.count(DrugInfo.drug_id)).scalar() or 0
     
-    # 最近7天销售趋势
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=6)
-    
-    daily_sales = db.session.query(
-        Sales.sales_date,
-        func.sum(Sales.total_price).label('total')
-    ).filter(Sales.sales_date.between(start_date, end_date)).\
-        group_by(Sales.sales_date).\
-        order_by(Sales.sales_date).all()
-    
-    # 销售Top5药品
-    top_drugs = db.session.query(
-        DrugInfo.name,
-        func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.total_price).label('total')
-    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        filter(Sales.sales_date >= start_date).\
-        group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.total_price).desc()).\
-        limit(5).all()
-    
     # 低库存预警
     low_stock_items = db.session.query(Inventory, DrugInfo.name, DrugInfo.unit).\
         join(DrugInfo, Inventory.drug_id == DrugInfo.drug_id).\
         filter(Inventory.quantity < 100).\
         order_by(Inventory.quantity).limit(10).all()
     
+    # 系统表概览
+    permissions = Permission.query.order_by(Permission.permission_id).all()
+    roles = Role.query.order_by(Role.role_id).all()
+    role_permissions = db.session.query(RolePermission, Role.name, Permission.name).\
+        join(Role, RolePermission.role_id == Role.role_id).\
+        join(Permission, RolePermission.permission_id == Permission.permission_id).\
+        order_by(RolePermission.id).all()
+    user_roles = db.session.query(UserRole, EmployeeInfo.name, Role.name).\
+        join(EmployeeInfo, UserRole.employee_id == EmployeeInfo.employee_id).\
+        join(Role, UserRole.role_id == Role.role_id).\
+        order_by(UserRole.id).all()
+    logs = SystemLog.query.order_by(SystemLog.action_time.desc()).limit(50).all()
+
     return render_template('dashboard/index.html',
                          today_sales=today_sales,
                          month_sales=month_sales,
                          total_inventory=total_inventory,
                          low_stock_count=low_stock_count,
                          total_drugs=total_drugs,
-                         daily_sales=daily_sales,
-                         top_drugs=top_drugs,
-                         low_stock_items=low_stock_items)
+                         low_stock_items=low_stock_items,
+                         permissions=permissions,
+                         roles=roles,
+                         role_permissions=role_permissions,
+                         user_roles=user_roles,
+                         logs=logs)
 
 
 @dashboard_bp.route('/reset_db', methods=['POST'])

@@ -19,22 +19,18 @@
                 <th>药品名称</th>
                 <th>供应商</th>
                 <th>数量</th>
-                <th>单价</th>
-                <th>总价</th>
                 <th>入库日期</th>
                 <th>经办人</th>
                 <th>备注</th>
             </tr>
         </thead>
         <tbody>
-            {% for stock_in, drug_name, supplier_name, employee_name in stock_ins %}
+            {% for stock_in, drug_name, supplier_name, employee_name, purchase_price in stock_ins %}
             <tr>
                 <td>#{{ stock_in.stock_in_id }}</td>
                 <td><strong>{{ drug_name }}</strong></td>
                 <td>{{ supplier_name }}</td>
                 <td>{{ stock_in.quantity }}</td>
-                <td>¥{{ "%.2f"|format(stock_in.unit_price) }}</td>
-                <td><strong>¥{{ "%.2f"|format(stock_in.total_price) }}</strong></td>
                 <td>{{ stock_in.stock_in_date }}</td>
                 <td>{{ employee_name }}</td>
                 <td>{{ stock_in.remark or '-' }}</td>

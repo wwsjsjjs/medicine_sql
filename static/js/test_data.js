@@ -121,7 +121,6 @@ const TestDataGenerator = {
             case 'stock_in':
                 return {
                     quantity: this.randomQuantity(50, 500),
-                    unit_price: this.randomPrice(5, 100),
                     remark: '测试入库'
                 };
             

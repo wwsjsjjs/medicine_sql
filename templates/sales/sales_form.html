@@ -19,9 +19,7 @@
                 <select id="drug_id" name="drug_id" class="form-control" required>
                     <option value="">请选择药品</option>
                     {% for drug in drugs %}
-                    <option value="{{ drug.drug_id }}" data-price="{{ drug.sale_price }}">
-                        {{ drug.name }} - ¥{{ "%.2f"|format(drug.sale_price) }}
-                    </option>
+                    <option value="{{ drug.drug_id }}">{{ drug.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -43,22 +41,12 @@
                 <input type="number" id="quantity" name="quantity" class="form-control" required min="1" value="1"
                        placeholder="例如：10">
             </div>
-            
-            <div class="form-group">
-                <label for="unit_price">单价 *</label>
-                <input type="number" step="0.01" id="unit_price" name="unit_price" class="form-control" required min="0" readonly>
-            </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="sales_date">销售日期 *</label>
                 <input type="date" id="sales_date" name="sales_date" class="form-control" required>
-            </div>
-            
-            <div class="form-group">
-                <label>总价</label>
-                <input type="text" id="total_display" class="form-control" readonly>
             </div>
         </div>
         
@@ -84,25 +72,6 @@
 </style>
 
 <script>
-// 自动填充单价
-document.getElementById('drug_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const price = selectedOption.getAttribute('data-price');
-    document.getElementById('unit_price').value = price || '';
-    calculateTotal();
-});
-
-// 计算总价
-function calculateTotal() {
-    const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-    const unitPrice = parseFloat(document.getElementById('unit_price').value) || 0;
-    const total = quantity * unitPrice;
-    document.getElementById('total_display').value = '¥' + total.toFixed(2);
-}
-
-document.getElementById('quantity').addEventListener('input', calculateTotal);
-document.getElementById('unit_price').addEventListener('input', calculateTotal);
-
 // 表单提交处理
 function handleSalesSubmit(event) {
     event.preventDefault();
@@ -110,7 +79,6 @@ function handleSalesSubmit(event) {
     const drugId = document.getElementById('drug_id').value;
     const customerId = document.getElementById('customer_id').value;
     const quantity = parseInt(document.getElementById('quantity').value);
-    const unitPrice = parseFloat(document.getElementById('unit_price').value);
     
     // 前端验证
     if (!drugId) {
@@ -125,11 +93,6 @@ function handleSalesSubmit(event) {
     
     if (quantity <= 0) {
         alert('❌ 销售数量必须大于0');
-        return false;
-    }
-    
-    if (unitPrice <= 0) {
-        alert('❌ 销售单价必须大于0');
         return false;
     }
     

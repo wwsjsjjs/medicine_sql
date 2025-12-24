@@ -90,5 +90,72 @@
             </tbody>
         </table>
     </div>
+
+    <div class="table-card">
+        <h3>权限表 (Permission)</h3>
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>名称</th><th>描述</th></tr></thead>
+            <tbody>
+                {% for p in permissions %}
+                <tr><td>{{ p.permission_id }}</td><td>{{ p.name }}</td><td>{{ p.description or '-' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-card">
+        <h3>角色表 (Role)</h3>
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>名称</th><th>描述</th></tr></thead>
+            <tbody>
+                {% for r in roles %}
+                <tr><td>{{ r.role_id }}</td><td>{{ r.name }}</td><td>{{ r.description or '-' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-card">
+        <h3>角色权限关联 (RolePermission)</h3>
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>角色</th><th>权限</th></tr></thead>
+            <tbody>
+                {% for rp, role_name, perm_name in role_permissions %}
+                <tr><td>{{ rp.id }}</td><td>{{ role_name }}</td><td>{{ perm_name }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-card">
+        <h3>用户角色关联 (UserRole)</h3>
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>用户</th><th>角色</th></tr></thead>
+            <tbody>
+                {% for ur, emp_name, role_name in user_roles %}
+                <tr><td>{{ ur.id }}</td><td>{{ emp_name }}</td><td>{{ role_name }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-card">
+        <h3>系统日志 (最近50条)</h3>
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>时间</th><th>员工</th><th>动作</th><th>表名</th><th>内容</th></tr></thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.log_id }}</td>
+                    <td>{{ log.action_time }}</td>
+                    <td>{{ log.employee_id or '-' }}</td>
+                    <td>{{ log.action_type }}</td>
+                    <td>{{ log.table_name }}</td>
+                    <td>{{ log.action_content }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
