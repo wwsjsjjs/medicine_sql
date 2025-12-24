@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}医药管理系统{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="{{ url_for('static', filename='js/test_data.js') }}"></script>
     {% block extra_css %}{% endblock %}
 </head>
@@ -72,18 +71,6 @@
                     </a>
                 </div>
                 
-                <div class="nav-group">
-                    <div class="nav-group-title">系统测试</div>
-                    <a href="{{ url_for('api_test.index') }}" class="nav-item">
-                        <span class="icon">🧪</span> API测试控制台
-                    </a>
-                    <a href="{{ url_for('api_test.custom_data') }}" class="nav-item">
-                        <span class="icon">🎨</span> 自定义测试数据
-                    </a>
-                    <a href="{{ url_for('api_test.view_system_tables') }}" class="nav-item">
-                        <span class="icon">🗂️</span> 系统表查看
-                    </a>
-                </div>
             </nav>
         </aside>
         

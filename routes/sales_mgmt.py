@@ -148,21 +148,26 @@ def finance_generate():
     """生成财务统计"""
     stat_type = request.form['stat_type']
     stat_date = datetime.strptime(request.form['stat_date'], '%Y-%m-%d').date()
+    admin = EmployeeInfo.query.filter_by(account='admin').first()
+    employee_id = request.form.get('employee_id') or (admin.employee_id if admin else None)
     
-    # 计算销售总额
+    filters = []
     if stat_type == '日':
-        total_sales = db.session.query(func.sum(Sales.total_price)).\
-            filter(Sales.sales_date == stat_date).scalar() or 0
+        filters.append(Sales.sales_date == stat_date)
     else:  # 月
-        total_sales = db.session.query(func.sum(Sales.total_price)).\
-            filter(extract('year', Sales.sales_date) == stat_date.year).\
-            filter(extract('month', Sales.sales_date) == stat_date.month).scalar() or 0
-    
-    # 计算成本（这里简化处理，实际应从采购价计算）
-    # 将Decimal转换为float进行计算，或使用Decimal类型
+        filters.append(extract('year', Sales.sales_date) == stat_date.year)
+        filters.append(extract('month', Sales.sales_date) == stat_date.month)
+
+    # 销售额与成本（按销售数量 * 进货价统计）
     from decimal import Decimal
+    total_sales = db.session.query(func.sum(Sales.total_price)).\
+        filter(*filters).scalar() or 0
+    total_cost = db.session.query(func.sum(Sales.quantity * DrugInfo.purchase_price)).\
+        join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
+        filter(*filters).scalar() or 0
+
     total_sales = Decimal(str(total_sales)) if total_sales else Decimal('0')
-    total_cost = total_sales * Decimal('0.6')  # 假设成本率60%
+    total_cost = Decimal(str(total_cost)) if total_cost else Decimal('0')
     total_profit = total_sales - total_cost
     
     # 检查是否已存在相同的统计记录
@@ -172,7 +177,7 @@ def finance_generate():
         finance_stat.total_sales = total_sales
         finance_stat.total_cost = total_cost
         finance_stat.total_profit = total_profit
-        finance_stat.employee_id = request.form.get('employee_id', 1)
+        finance_stat.employee_id = employee_id
         flash('财务统计更新成功！', 'success')
     else:
         # 不存在则插入
@@ -182,7 +187,7 @@ def finance_generate():
             total_sales=total_sales,
             total_cost=total_cost,
             total_profit=total_profit,
-            employee_id=request.form.get('employee_id', 1)
+            employee_id=employee_id
         )
         db.session.add(finance_stat)
         flash('财务统计生成成功！', 'success')

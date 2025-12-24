@@ -23,6 +23,7 @@ def stock_in_list():
 def stock_in_add():
     """添加入库"""
     if request.method == 'POST':
+        location = (request.form.get('location') or '').strip() or None
         # 验证药品是否存在
         drug = DrugInfo.query.get(request.form['drug_id'])
         if not drug:
@@ -62,11 +63,14 @@ def stock_in_add():
         
         if inventory:
             inventory.quantity += int(request.form['quantity'])
+            if location:
+                inventory.location = location
         else:
             inventory = Inventory(
                 drug_id=stock_in.drug_id,
                 warehouse_id=request.form.get('warehouse_id', 1),
-                quantity=int(request.form['quantity'])
+                quantity=int(request.form['quantity']),
+                location=location
             )
             db.session.add(inventory)
         
@@ -214,10 +218,12 @@ def return_add():
     if request.method == 'POST':
         warehouse_id = request.form.get('warehouse_id', 1)
         quantity = int(request.form['quantity'])
+        drug_id = request.form['drug_id']
+        supplier_id = request.form['supplier_id']
         
         # 验证库存是否存在且足够
         inventory = Inventory.query.filter_by(
-            drug_id=request.form['drug_id'],
+            drug_id=drug_id,
             warehouse_id=warehouse_id
         ).first()
         if not inventory:
@@ -226,10 +232,22 @@ def return_add():
         if inventory.quantity < quantity:
             flash(f'库存不足！当前库存：{inventory.quantity}，退货数量：{quantity}', 'danger')
             return redirect(url_for('inventory.return_add'))
+
+        # 验证供应商采购记录与退货额度
+        purchased_qty = db.session.query(func.coalesce(func.sum(StockIn.quantity), 0)).\
+            filter_by(drug_id=drug_id, supplier_id=supplier_id).scalar()
+        returned_qty = db.session.query(func.coalesce(func.sum(ReturnStock.quantity), 0)).\
+            filter_by(drug_id=drug_id, supplier_id=supplier_id).scalar()
+        if purchased_qty == 0:
+            flash('该供应商没有该药品的采购记录，无法退货！', 'danger')
+            return redirect(url_for('inventory.return_add'))
+        if quantity + returned_qty > purchased_qty:
+            flash(f'退货数量超出该供应商已采购数量！已采购 {purchased_qty}，已退 {returned_qty}，本次退货 {quantity}', 'danger')
+            return redirect(url_for('inventory.return_add'))
         
         return_stock = ReturnStock(
-            drug_id=request.form['drug_id'],
-            supplier_id=request.form['supplier_id'],
+            drug_id=drug_id,
+            supplier_id=supplier_id,
             quantity=quantity,
             reason=request.form.get('reason'),
             return_date=datetime.strptime(request.form['return_date'], '%Y-%m-%d').date(),

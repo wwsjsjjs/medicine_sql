@@ -1,10 +1,11 @@
 """
 数据分析和仪表盘模块
 """
-from flask import Blueprint, render_template, jsonify, request
-from models import db, Sales, DrugInfo, Inventory, FinanceStat, StockIn
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from models import db, Sales, DrugInfo, Inventory, FinanceStat, StockIn, EmployeeInfo, init_basic_tables
 from datetime import datetime, timedelta
 from sqlalchemy import func, extract
+import pathlib
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -70,77 +71,25 @@ def index():
                          top_drugs=top_drugs,
                          low_stock_items=low_stock_items)
 
-@dashboard_bp.route('/api/sales_trend')
-def api_sales_trend():
-    """销售趋势API（用于图表）"""
-    days = int(request.args.get('days', 30))
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=days-1)
-    
-    daily_sales = db.session.query(
-        Sales.sales_date,
-        func.sum(Sales.total_price).label('total'),
-        func.count(Sales.sales_id).label('count')
-    ).filter(Sales.sales_date.between(start_date, end_date)).\
-        group_by(Sales.sales_date).\
-        order_by(Sales.sales_date).all()
-    
-    dates = []
-    amounts = []
-    counts = []
-    
-    for sale in daily_sales:
-        dates.append(str(sale[0]))
-        amounts.append(float(sale[1]))
-        counts.append(sale[2])
-    
-    return jsonify({
-        'dates': dates,
-        'amounts': amounts,
-        'counts': counts
-    })
 
-@dashboard_bp.route('/api/inventory_status')
-def api_inventory_status():
-    """库存状态API"""
-    # 库存状态分类：充足(>500), 正常(100-500), 不足(<100)
-    abundant = db.session.query(func.count(Inventory.inventory_id)).\
-        filter(Inventory.quantity > 500).scalar() or 0
-    normal = db.session.query(func.count(Inventory.inventory_id)).\
-        filter(Inventory.quantity.between(100, 500)).scalar() or 0
-    low = db.session.query(func.count(Inventory.inventory_id)).\
-        filter(Inventory.quantity < 100).scalar() or 0
-    
-    return jsonify({
-        'labels': ['充足', '正常', '不足'],
-        'data': [abundant, normal, low]
-    })
+@dashboard_bp.route('/reset_db', methods=['POST'])
+def reset_db():
+    """清空并重新初始化数据库，仅保留系统管理员"""
+    try:
+        # 完整重建所有表，防止外键遗留
+        db.session.remove()
+        db.drop_all()
+        db.create_all()
 
-@dashboard_bp.route('/api/top_drugs')
-def api_top_drugs():
-    """热销药品API"""
-    limit = int(request.args.get('limit', 10))
-    
-    top_drugs = db.session.query(
-        DrugInfo.name,
-        func.sum(Sales.quantity).label('quantity'),
-        func.sum(Sales.total_price).label('total')
-    ).join(DrugInfo, Sales.drug_id == DrugInfo.drug_id).\
-        group_by(DrugInfo.name).\
-        order_by(func.sum(Sales.total_price).desc()).\
-        limit(limit).all()
-    
-    names = []
-    quantities = []
-    totals = []
-    
-    for drug in top_drugs:
-        names.append(drug[0])
-        quantities.append(drug[1])
-        totals.append(float(drug[2]))
-    
-    return jsonify({
-        'names': names,
-        'quantities': quantities,
-        'totals': totals
-    })
+        # 初始化基础数据（含管理员账号）
+        init_basic_tables()
+
+        # 仅保留账号 admin 的系统管理员，删除其他员工
+        EmployeeInfo.query.filter(EmployeeInfo.account != 'admin').delete()
+        db.session.commit()
+
+        flash('数据库已重建，已恢复基础数据并仅保留系统管理员。', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'数据库重置失败: {e}', 'danger')
+    return redirect(url_for('dashboard.index'))

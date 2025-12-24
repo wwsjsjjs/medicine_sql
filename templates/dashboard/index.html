@@ -5,6 +5,16 @@
 
 {% block content %}
 <div class="dashboard">
+    <div class="table-card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h3 style="margin:0;">数据维护</h3>
+            <p style="margin:4px 0 0; color:#666;">清空数据库并恢复到初始基础数据（管理员、权限等）。</p>
+        </div>
+        <form method="post" action="{{ url_for('dashboard.reset_db') }}" onsubmit="return confirm('确认清空并重新初始化数据库？所有业务数据将被删除！');">
+            <button type="submit" class="btn btn-danger">🗑️ 清空并重置数据库</button>
+        </form>
+    </div>
+
     <!-- 关键指标卡片 -->
     <div class="stats-grid">
         <div class="stat-card blue">
@@ -48,19 +58,6 @@
         </div>
     </div>
     
-    <!-- 图表区域 -->
-    <div class="charts-grid">
-        <div class="chart-card">
-            <h3>近7天销售趋势</h3>
-            <canvas id="salesTrendChart"></canvas>
-        </div>
-        
-        <div class="chart-card">
-            <h3>热销药品 TOP 5</h3>
-            <canvas id="topDrugsChart"></canvas>
-        </div>
-    </div>
-    
     <!-- 低库存预警表 -->
     <div class="table-card">
         <h3>库存预警 (库存 < 100)</h3>
@@ -94,86 +91,4 @@
         </table>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// 销售趋势图表
-const salesData = {
-    labels: [{% for sale in daily_sales %}'{{ sale[0] }}',{% endfor %}],
-    datasets: [{
-        label: '销售额',
-        data: [{% for sale in daily_sales %}{{ sale[1] }},{% endfor %}],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.4,
-        fill: true
-    }]
-};
-
-new Chart(document.getElementById('salesTrendChart'), {
-    type: 'line',
-    data: salesData,
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top'
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return '¥' + value;
-                    }
-                }
-            }
-        }
-    }
-});
-
-// 热销药品图表
-const topDrugsData = {
-    labels: [{% for drug in top_drugs %}'{{ drug[0] }}',{% endfor %}],
-    datasets: [{
-        label: '销售额',
-        data: [{% for drug in top_drugs %}{{ drug[2] }},{% endfor %}],
-        backgroundColor: [
-            'rgba(255, 99, 132, 0.8)',
-            'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 206, 86, 0.8)',
-            'rgba(75, 192, 192, 0.8)',
-            'rgba(153, 102, 255, 0.8)'
-        ]
-    }]
-};
-
-new Chart(document.getElementById('topDrugsChart'), {
-    type: 'bar',
-    data: topDrugsData,
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return '¥' + value;
-                    }
-                }
-            }
-        }
-    }
-});
-</script>
 {% endblock %}
